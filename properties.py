@@ -23,6 +23,8 @@ class STRA_PGT_Structure(PropertyGroup):
     )
     overlap_margin: bpy.props.FloatProperty(
         name="Overlap margin",
+        min=0,
+        max=10,
         default=0.0
     )
     subd: bpy.props.IntProperty(

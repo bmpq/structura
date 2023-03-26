@@ -54,7 +54,7 @@ def get_bvh(collection, use_overlap_margin, overlap_margin, subd):
         bmesh.ops.transform(bm, matrix=obj.matrix_world, verts=bm.verts)
 
         if use_overlap_margin:
-            bmesh.ops.solidify(bm, geom=bm.faces, thickness=overlap_margin)
+            bmesh.ops.solidify(bm, geom=bm.faces, thickness=-overlap_margin)
 
         if subd > 0:
             bmesh.ops.subdivide_edges(bm, edges=bm.edges, cuts=subd)
