@@ -77,6 +77,8 @@ class STRA_OT_Generate_Structure(Operator):
         props = context.scene.stra_props_structure
         props_const = context.scene.stra_props_joint
         collection = context.collection
+        if 'joint' in collection.name:
+            collection = utils.get_parent_collection(collection)
 
         bpy.context.scene.frame_current = 0
         bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)

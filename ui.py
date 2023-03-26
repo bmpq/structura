@@ -1,5 +1,6 @@
 import bpy
 from bpy.types import Panel, Operator, PropertyGroup
+from . import utils
 
 
 class STRA_PT_Panel(Panel):
@@ -17,30 +18,25 @@ class STRA_PT_Panel(Panel):
         props_viewport = context.scene.stra_props_viewport
 
         col_selected = context.collection
+        if 'joints' in col_selected.name:
+            col_selected = utils.get_parent_collection(col_selected)
+
         col_joints = col_selected.children.get(col_selected.name + '_joints')
         generated = col_joints is not None and len(col_joints.objects) > 0
 
         r = layout.row()
         r.operator("stra.viewport_collider_hide",
-                   icon='HIDE_ON' if props_viewport.hide else 'HIDE_OFF')
+                   icon='HIDE_ON' if props_viewport.hide else 'HIDE_OFF', text='')
         r.operator("stra.viewport_collider_selectable",
-                   icon='RESTRICT_SELECT_OFF' if props_viewport.selectable else 'RESTRICT_SELECT_ON')
+                   icon='RESTRICT_SELECT_OFF' if props_viewport.selectable else 'RESTRICT_SELECT_ON', text='')
         r.operator("stra.viewport_collider_show_in_front",
-                   icon='XRAY' if props_viewport.show_in_front else 'CUBE')
-        r.operator("stra.viewport_collider_detect", icon='ALIGN_LEFT')
+                   icon='XRAY' if props_viewport.show_in_front else 'CUBE', text='')
+        r.operator("stra.viewport_collider_detect", icon='ALIGN_LEFT', text='')
 
         layout.separator(factor=2)
 
         if col_selected == context.scene.collection:
             layout.label(text='Scene collection selected')
-            return
-
-        if 'joints' in col_selected.name:
-            layout.label(text='Joint collection selected')
-            return
-
-        if 'compound' in col_selected.name:
-            layout.label(text='Compound collection selected')
             return
 
         if generated:
@@ -56,9 +52,12 @@ class STRA_PT_Panel(Panel):
         layout.separator(factor=2)
 
         mesh_amount = 0
-        for ob in context.collection.objects:
-            if ob.type == 'MESH':
-                mesh_amount += 1
+        for ob in col_selected.objects:
+            if ob.type != 'MESH':
+                continue
+            if 'collider' in ob.name:
+                continue
+            mesh_amount += 1
 
         layout.label(text=f'{mesh_amount} mesh objects in [{col_selected.name}]')
 
@@ -94,6 +93,9 @@ class STRA_PT_Panel(Panel):
                     if sh.identifier == ob.rigid_body.collision_shape:
                         sh_amount[sh] += 1
                         break
+
+        if mesh_amount == 0:
+            return
 
         layout.label(text=f'{mesh_amount} mesh selected ({rb_amount} RB)')
 

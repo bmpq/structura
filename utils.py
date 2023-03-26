@@ -1,3 +1,4 @@
+from gc import collect
 import bpy
 
 
@@ -24,3 +25,10 @@ def reset_collection(parent_collection, name):
     bpy.ops.outliner.orphans_purge(do_local_ids=True)
 
     return col_reset
+
+
+def get_parent_collection(collection):
+    for parent in bpy.data.collections:
+        for child in parent.children_recursive:
+            if child == collection:
+                return parent

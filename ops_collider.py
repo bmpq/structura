@@ -2,6 +2,7 @@ import bpy
 import bmesh
 from bpy.types import Operator
 from mathutils.bvhtree import BVHTree
+from . import utils
 
 
 class STRA_OT_Generate_Colliders(Operator):
@@ -80,7 +81,11 @@ class STRA_OT_Generate_Colliders(Operator):
                 bm.free()
 
                 new_ob = bpy.data.objects.new(ob.name + "_collider", new_me)
-                context.collection.objects.link(new_ob)
+                if 'joint' in context.collection.name:
+                    utils.get_parent_collection(context.collection).objects.link(new_ob)
+                else:
+                    context.collection.objects.link(new_ob)
+
                 new_ob.parent = ob
                 bpy.context.view_layer.objects.active = new_ob
 
