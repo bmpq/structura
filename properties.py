@@ -29,6 +29,7 @@ class STRA_PGT_Structure(PropertyGroup):
     )
     subd: bpy.props.IntProperty(
         name="Subdivision cuts",
+        description='The accuracy of finding overlap points, useful for low poly meshes',
         min=0,
         max=100,
         default=4

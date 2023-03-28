@@ -25,13 +25,14 @@ class STRA_PT_Panel(Panel):
         generated = col_joints is not None and len(col_joints.objects) > 0
 
         if col_selected == context.scene.collection:
-            layout.label(text='Scene collection selected')
+            r = layout.row()
+            r.alert = True
+            r.label(text='Scene collection selected')
             return
 
         r = layout.row()
         r.alignment = 'CENTER'
         r.active = False
-        r.label(text='-- Joint generation --')
 
         mesh_amount = 0
         for ob in col_selected.objects:
@@ -41,7 +42,13 @@ class STRA_PT_Panel(Panel):
                 continue
             mesh_amount += 1
 
+        if mesh_amount > 0:
+            r.label(text='-- Joint generation --')
+
         layout.label(text=f'{mesh_amount} mesh objects in [{col_selected.name}]')
+
+        if mesh_amount == 0:
+            return
 
         if generated:
             layout.label(text=f'{len(col_joints.objects)} generated joint constraints')
@@ -58,10 +65,12 @@ class STRA_PT_Panel(Panel):
             r.scale_y = 2
             r.operator("stra.structure_modify", icon='MOD_NORMALEDIT', text=f'Apply to [{col_joints.name}]')
 
+        layout.separator(factor=1)
+
         layout.prop(props_structure, "use_overlap_margin")
         if props_structure.use_overlap_margin:
             layout.prop(props_structure, "overlap_margin")
-        layout.prop(props_structure, "subd")
+        layout.prop(props_structure, "subd", text='Overlap detection accuracy')
 
         r = layout.row()
         r.scale_y = 2
@@ -96,15 +105,23 @@ class STRA_PT_Panel(Panel):
         r.active = False
         r.label(text='-- Collider generation --')
 
-        b = layout.box()
-        r = b.row()
-        r.operator("stra.viewport_collider_hide",
-                   icon='HIDE_ON' if props_viewport.hide else 'HIDE_OFF', text='')
-        r.operator("stra.viewport_collider_selectable",
-                   icon='RESTRICT_SELECT_OFF' if props_viewport.selectable else 'RESTRICT_SELECT_ON', text='')
-        r.operator("stra.viewport_collider_show_in_front",
-                   icon='XRAY' if props_viewport.show_in_front else 'CUBE', text='')
-        r.operator("stra.viewport_collider_detect", icon='ALIGN_LEFT', text='')
+        using_custom_colliders = False
+        for ob in bpy.data.objects:
+            if ob.rigid_body:
+                if ob.rigid_body.collision_shape == 'COMPOUND':
+                    using_custom_colliders = True
+                    break
+
+        if using_custom_colliders:
+            b = layout.box()
+            r = b.row()
+            r.operator("stra.viewport_collider_hide",
+                       icon='HIDE_ON' if props_viewport.hide else 'HIDE_OFF', text='')
+            r.operator("stra.viewport_collider_selectable",
+                       icon='RESTRICT_SELECT_OFF' if props_viewport.selectable else 'RESTRICT_SELECT_ON', text='')
+            r.operator("stra.viewport_collider_show_in_front",
+                       icon='XRAY' if props_viewport.show_in_front else 'CUBE', text='')
+            r.operator("stra.viewport_collider_detect", icon='ALIGN_LEFT', text='')
 
         layout.label(text=f'{mesh_amount} mesh selected ({rb_amount} RB):')
 
@@ -112,6 +129,7 @@ class STRA_PT_Panel(Panel):
             return
 
         b = layout.box()
+        b.active = False
         for sh in sh_amount:
             if sh_amount[sh] == 0:
                 continue
@@ -125,6 +143,8 @@ class STRA_PT_Panel(Panel):
             c2.alignment = 'RIGHT'
             c2.label(text=f'{sh_amount[sh]}')
 
+        layout.separator(factor=1)
+
         layout.prop(props_collider, property="shape", text="Collider shape")
         if props_collider.shape == 'COMPOUND':
             layout.prop(props_collider, "scale")
@@ -135,4 +155,5 @@ class STRA_PT_Panel(Panel):
         if props_collider.progress > 0.0 and props_collider.progress < 1.0:
             r.label(text=f"Progress: {props_collider.progress*100:.2f}%")
         else:
-            r.operator("stra.collider_generate", icon='MESH_ICOSPHERE')
+            txt = f'Generate colliders for {mesh_amount} object(s)' if props_collider.shape == 'COMPOUND' else f'Set to {props_collider.shape} for {mesh_amount} object(s)'
+            r.operator("stra.collider_generate", icon='MESH_ICOSPHERE', text=txt)
