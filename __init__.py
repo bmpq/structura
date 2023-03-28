@@ -29,6 +29,7 @@ classes = [
     viewport.STRA_OT_Viewport_collider_detect,
 
     ops_structure.STRA_OT_Generate_Structure,
+    ops_structure.STRA_OT_Modify_Structure,
     ops_collider.STRA_OT_Generate_Colliders,
 
     ui.STRA_PT_Panel

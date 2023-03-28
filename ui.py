@@ -53,6 +53,11 @@ class STRA_PT_Panel(Panel):
         layout.prop(props_joint, "use_local_collisions")
         layout.prop(props_joint, "break_threshold")
 
+        if generated:
+            r = layout.row()
+            r.scale_y = 2
+            r.operator("stra.structure_modify", icon='MOD_NORMALEDIT', text=f'Apply to [{col_joints.name}]')
+
         layout.prop(props_structure, "use_overlap_margin")
         if props_structure.use_overlap_margin:
             layout.prop(props_structure, "overlap_margin")
@@ -63,7 +68,8 @@ class STRA_PT_Panel(Panel):
         if props_structure.progress > 0.0 and props_structure.progress < 1.0:
             r.label(text=f"Progress: {props_structure.progress*100:.2f}%")
         else:
-            r.operator("stra.structure_generate", icon='MOD_MESHDEFORM')
+            txt_button = 'Regenerate structure' if generated else 'Generate structure'
+            r.operator("stra.structure_generate", icon='MOD_MESHDEFORM', text=txt_button)
 
         layout.separator(factor=2)
 

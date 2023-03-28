@@ -7,34 +7,34 @@ from mathutils.bvhtree import BVHTree
 from . import utils
 
 
-def modify_active_const(props):
-    bpy.context.object.rigid_body_constraint.type = props.type
-    bpy.context.object.rigid_body_constraint.disable_collisions = not props.use_local_collisions
-    bpy.context.object.rigid_body_constraint.use_breaking = True
-    bpy.context.object.rigid_body_constraint.breaking_threshold = props.break_threshold
+def modify_const(ob, props):
+    ob.rigid_body_constraint.type = props.type
+    ob.rigid_body_constraint.disable_collisions = not props.use_local_collisions
+    ob.rigid_body_constraint.use_breaking = True
+    ob.rigid_body_constraint.breaking_threshold = props.break_threshold
 
     ang_max = math.radians(props.leeway_angular)
     lin_max = props.leeway_linear
 
-    bpy.context.object.rigid_body_constraint.use_limit_ang_x = True
-    bpy.context.object.rigid_body_constraint.limit_ang_x_lower = 0
-    bpy.context.object.rigid_body_constraint.limit_ang_x_upper = ang_max
-    bpy.context.object.rigid_body_constraint.use_limit_ang_y = True
-    bpy.context.object.rigid_body_constraint.limit_ang_y_lower = 0
-    bpy.context.object.rigid_body_constraint.limit_ang_y_upper = ang_max
-    bpy.context.object.rigid_body_constraint.use_limit_ang_z = True
-    bpy.context.object.rigid_body_constraint.limit_ang_z_lower = 0
-    bpy.context.object.rigid_body_constraint.limit_ang_z_upper = ang_max
+    ob.rigid_body_constraint.use_limit_ang_x = True
+    ob.rigid_body_constraint.limit_ang_x_lower = 0
+    ob.rigid_body_constraint.limit_ang_x_upper = ang_max
+    ob.rigid_body_constraint.use_limit_ang_y = True
+    ob.rigid_body_constraint.limit_ang_y_lower = 0
+    ob.rigid_body_constraint.limit_ang_y_upper = ang_max
+    ob.rigid_body_constraint.use_limit_ang_z = True
+    ob.rigid_body_constraint.limit_ang_z_lower = 0
+    ob.rigid_body_constraint.limit_ang_z_upper = ang_max
 
-    bpy.context.object.rigid_body_constraint.use_limit_lin_x = True
-    bpy.context.object.rigid_body_constraint.limit_lin_x_lower = 0
-    bpy.context.object.rigid_body_constraint.limit_lin_x_upper = lin_max
-    bpy.context.object.rigid_body_constraint.use_limit_lin_y = True
-    bpy.context.object.rigid_body_constraint.limit_lin_y_lower = 0
-    bpy.context.object.rigid_body_constraint.limit_lin_y_upper = lin_max
-    bpy.context.object.rigid_body_constraint.use_limit_lin_z = True
-    bpy.context.object.rigid_body_constraint.limit_lin_z_lower = 0
-    bpy.context.object.rigid_body_constraint.limit_lin_z_upper = lin_max
+    ob.rigid_body_constraint.use_limit_lin_x = True
+    ob.rigid_body_constraint.limit_lin_x_lower = 0
+    ob.rigid_body_constraint.limit_lin_x_upper = lin_max
+    ob.rigid_body_constraint.use_limit_lin_y = True
+    ob.rigid_body_constraint.limit_lin_y_lower = 0
+    ob.rigid_body_constraint.limit_lin_y_upper = lin_max
+    ob.rigid_body_constraint.use_limit_lin_z = True
+    ob.rigid_body_constraint.limit_lin_z_lower = 0
+    ob.rigid_body_constraint.limit_lin_z_upper = lin_max
 
 
 def get_bvh(collection, use_overlap_margin, overlap_margin, subd):
@@ -67,6 +67,27 @@ def get_bvh(collection, use_overlap_margin, overlap_margin, subd):
         trees.append((tree, (obj, bm)))
 
     return trees
+
+
+class STRA_OT_Modify_Structure(Operator):
+    bl_idname = "stra.structure_modify"
+    bl_label = "Modify structure"
+
+    def execute(self, context):
+        props = context.scene.stra_props_joint
+        collection = context.collection
+        if 'joint' in collection.name:
+            collection = utils.get_parent_collection(collection)
+
+        bpy.context.scene.frame_current = 0
+        bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
+
+        col_joints = collection.children.get(collection.name + '_joints')
+
+        for ob in col_joints.objects:
+            modify_const(ob, props)
+
+        return {'FINISHED'}
 
 
 class STRA_OT_Generate_Structure(Operator):
@@ -117,7 +138,7 @@ class STRA_OT_Generate_Structure(Operator):
                     bpy.context.view_layer.objects.active = empty
                     bpy.ops.rigidbody.constraint_add(type=props_const.type)
 
-                    modify_active_const(props_const)
+                    modify_const(empty, props_const)
 
                     bpy.context.object.rigid_body_constraint.object1 = obj1
                     bpy.context.object.rigid_body_constraint.object2 = obj2
