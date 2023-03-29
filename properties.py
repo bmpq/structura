@@ -64,13 +64,18 @@ class STRA_PGT_Structure(PropertyGroup):
 
 
 class STRA_PGT_Joint(PropertyGroup):
-    constraint_types = bpy.types.RigidBodyConstraint.bl_rna.properties["type"].enum_items
+    constraint_types = []
+    constraint_types.append(('FIXED', 'Fixed', 'Glueing objects together'))
+    constraint_types.append(('POINT', 'Ball', 'Jointed objects can rotate around the joint freely'))
+    constraint_types.append(('GENERIC', 'Elastic', 'Joints with elbow room'))
+
     type: bpy.props.EnumProperty(
-        items=[(item.identifier, item.name, item.description) for item in constraint_types]
+        items=constraint_types
     )
     use_local_collisions: bpy.props.BoolProperty(
         name="Enable local collisions",
-        default=False
+        default=False,
+        description='Enable collisions between jointed objects'
     )
     break_threshold: bpy.props.FloatProperty(
         name="Break threshold",
@@ -93,9 +98,11 @@ class STRA_PGT_Joint(PropertyGroup):
 
 
 class STRA_PGT_Collider(PropertyGroup):
-    rb_shapes = bpy.types.RigidBodyObject.bl_rna.properties["collision_shape"].enum_items
+    rb_shapes = []
+    rb_shapes.append(('CONVEX_HULL', 'Convex Hull', ''))
+    rb_shapes.append(('COMPOUND', 'Custom (Voxel)', ''))
     shape: bpy.props.EnumProperty(
-        items=[(item.identifier, item.name, item.description) for item in rb_shapes]
+        items=rb_shapes
     )
     scale: bpy.props.FloatVectorProperty(
         name='Scale', subtype='XYZ',
@@ -106,7 +113,7 @@ class STRA_PGT_Collider(PropertyGroup):
     voxel_size: bpy.props.FloatProperty(
         name='Voxel size',
         min=0.01,
-        default=0.04
+        default=0.1
     )
     progress: bpy.props.FloatProperty(
         name='Progress',

@@ -103,7 +103,8 @@ class STRA_OT_Generate_Colliders(Operator):
 
                 index += 1
                 props.progress = index / len(mesh_data)
-                bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
+
+            bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
 
         if bpy.context.view_layer.objects.active == None:
             if len(context.selectable_objects) > 0:

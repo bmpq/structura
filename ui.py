@@ -79,10 +79,6 @@ class STRA_PT_Joint(Panel):
             r.label(text='Scene collection selected')
             return
 
-        r = layout.row()
-        r.alignment = 'CENTER'
-        r.active = False
-
         mesh_amount = 0
         for ob in col_selected.objects:
             if ob.type != 'MESH':
@@ -91,14 +87,18 @@ class STRA_PT_Joint(Panel):
                 continue
             mesh_amount += 1
 
-        layout.label(text=f'{mesh_amount} mesh objects in [{col_selected.name}]')
+        layout.label(text=f'{mesh_amount} mesh object(s) in [{col_selected.name}]')
 
-        if mesh_amount == 0:
+        if mesh_amount < 2:
             return
 
         if generated:
             layout.label(text=f'{len(col_joints.objects)} generated joint constraints')
-        layout.prop(props_joint, "type", text="Constraint type")
+        r = layout.row()
+        c1 = r.column()
+        c2 = r.column()
+        c1.label(text='Joint type')
+        c2.prop(props_joint, "type", text="")
         if props_joint.type == 'GENERIC':
             r = layout.row()
             r.prop(props_joint, "leeway_linear")
@@ -109,7 +109,7 @@ class STRA_PT_Joint(Panel):
         if generated:
             r = layout.row()
             r.scale_y = 2
-            r.operator("stra.structure_modify", icon='MOD_NORMALEDIT', text=f'Apply to [{col_joints.name}]')
+            r.operator("stra.structure_modify", icon='MOD_NORMALEDIT', text=f'Apply to {len(col_joints.objects)} joint(s)')
 
         layout.separator(factor=1)
 

@@ -43,6 +43,7 @@ class STRA_OT_Generate_Wireframe(Operator):
         objs = context.selected_objects
 
         for ob in objs:
+            ob.select_set(False)
             if ob.type != 'MESH':
                 continue
 
