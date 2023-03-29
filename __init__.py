@@ -32,7 +32,8 @@ classes = [
     ops_structure.STRA_OT_Modify_Structure,
     ops_collider.STRA_OT_Generate_Colliders,
 
-    ui.STRA_PT_Panel
+    ui.STRA_PT_Collider,
+    ui.STRA_PT_Joint
 ]
 
 def register():

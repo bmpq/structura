@@ -3,9 +3,9 @@ from bpy.types import Panel, Operator, PropertyGroup
 from . import utils
 
 
-class STRA_PT_Panel(Panel):
-    bl_idname = "OBJECT_PT_structura_panel"
-    bl_label = "Structura"
+class STRA_PT_Joint(Panel):
+    bl_idname = "STRA_PT_Joint"
+    bl_label = "Joints"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_category = "Structura"
@@ -13,9 +13,7 @@ class STRA_PT_Panel(Panel):
     def draw(self, context):
         layout = self.layout
         props_structure = context.scene.stra_props_structure
-        props_collider = context.scene.stra_props_collider
         props_joint = context.scene.stra_props_joint
-        props_viewport = context.scene.stra_props_viewport
 
         col_selected = context.collection
         if 'joints' in col_selected.name:
@@ -41,9 +39,6 @@ class STRA_PT_Panel(Panel):
             if 'collider' in ob.name:
                 continue
             mesh_amount += 1
-
-        if mesh_amount > 0:
-            r.label(text='-- Joint generation --')
 
         layout.label(text=f'{mesh_amount} mesh objects in [{col_selected.name}]')
 
@@ -77,10 +72,21 @@ class STRA_PT_Panel(Panel):
         if props_structure.progress > 0.0 and props_structure.progress < 1.0:
             r.label(text=f"Progress: {props_structure.progress*100:.2f}%")
         else:
-            txt_button = 'Regenerate structure' if generated else 'Generate structure'
+            txt_button = 'Regenerate joints and apply' if generated else 'Generate joints'
             r.operator("stra.structure_generate", icon='MOD_MESHDEFORM', text=txt_button)
 
-        layout.separator(factor=2)
+
+class STRA_PT_Collider(Panel):
+    bl_idname = "STRA_PT_Collider"
+    bl_label = "Colliders"
+    bl_category = "Structura"
+    bl_space_type = 'VIEW_3D'
+    bl_region_type = 'UI'
+
+    def draw(self, context):
+        layout = self.layout
+        props_collider = context.scene.stra_props_collider
+        props_viewport = context.scene.stra_props_viewport
 
         mesh_amount = 0
         rb_amount = 0
@@ -99,11 +105,6 @@ class STRA_PT_Panel(Panel):
                     if sh.identifier == ob.rigid_body.collision_shape:
                         sh_amount[sh] += 1
                         break
-
-        r = layout.row()
-        r.alignment = 'CENTER'
-        r.active = False
-        r.label(text='-- Collider generation --')
 
         using_custom_colliders = False
         for ob in bpy.data.objects:
