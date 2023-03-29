@@ -75,7 +75,7 @@ class STRA_PGT_Joint(PropertyGroup):
     leeway_angular: bpy.props.FloatProperty(
         name="Angular range",
         min=0.0,
-        max=10.0,
+        max=180.0,
         default=1
     )
 

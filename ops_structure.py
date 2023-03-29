@@ -82,7 +82,7 @@ class STRA_OT_Modify_Structure(Operator):
         bpy.context.scene.frame_current = 0
         bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
 
-        col_joints = collection.children.get(collection.name + '_joints')
+        col_joints = collection.children.get(collection.name + '_STRA_JOINTS')
 
         for ob in col_joints.objects:
             modify_const(ob, props)
@@ -105,7 +105,7 @@ class STRA_OT_Generate_Structure(Operator):
         bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
 
         trees = get_bvh(collection, props.overlap_margin, props.overlap_margin, props.subd)
-        col_empties = utils.reset_collection(collection, collection.name + '_joints')
+        col_empties = utils.reset_collection(collection, collection.name + '_STRA_JOINTS')
 
         for i in range(len(trees)):
             for j in range(i + 1, len(trees)):
@@ -128,7 +128,7 @@ class STRA_OT_Generate_Structure(Operator):
                                     min_dist = (v1.co - v2.co).length
                                     loc = (v1.co + v2.co) / 2
 
-                    empty_name = f'{obj1.name}_{obj2.name}_joint'
+                    empty_name = f'{obj1.name}_{obj2.name}_STRA_JOINT'
                     empty = bpy.data.objects.new(empty_name, None)
                     empty.empty_display_size = 0.2
 

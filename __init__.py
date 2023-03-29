@@ -35,9 +35,9 @@ classes = [
     ops_collider.STRA_OT_Generate_Colliders,
     ops_wireframe.STRA_OT_Generate_Wireframe,
 
-    ui.STRA_PT_Collider,
+    ui.STRA_PT_Wireframe,
     ui.STRA_PT_Joint,
-    ui.STRA_PT_Wireframe
+    ui.STRA_PT_Collider
 ]
 
 def register():

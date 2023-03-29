@@ -19,6 +19,9 @@ class STRA_PT_Wireframe(Panel):
         edges = 0
 
         for ob in context.selected_objects:
+            if 'STRA_EDGE' in ob.name:
+                layout.label(text='Generated edge selected')
+                return
             if ob.type == 'MESH':
                 if 'collider' in ob.name:
                     ob = ob.parent
@@ -35,7 +38,14 @@ class STRA_PT_Wireframe(Panel):
 
         layout.prop(props, "thickness")
 
-        txt_gen = f'Generate {edges} objects'
+        txt_gen = f'Generate {edges} edge objects'
+
+        if len(context.selected_objects) == 1:
+            ob = context.selected_objects[0]
+            for col in bpy.data.collections:
+                if (ob.name + '_STRA_WIREFRAME') in col.name:
+                    txt_gen = f'Regenerate {edges} edge objects'
+                    break
 
         r = layout.row()
         r.scale_y = 2
@@ -59,7 +69,7 @@ class STRA_PT_Joint(Panel):
         if 'joints' in col_selected.name:
             col_selected = utils.get_parent_collection(col_selected)
 
-        col_joints = col_selected.children.get(col_selected.name + '_joints')
+        col_joints = col_selected.children.get(col_selected.name + 'STRA_JOINTS')
         generated = col_joints is not None and len(col_joints.objects) > 0
 
         if col_selected == context.scene.collection:
@@ -102,7 +112,7 @@ class STRA_PT_Joint(Panel):
 
         layout.separator(factor=1)
 
-        layout.prop(props_structure, "use_overlap_margin")
+        layout.prop(props_structure, "use_overlap_margin", text='Use overlap margin (slower)')
         if props_structure.use_overlap_margin:
             layout.prop(props_structure, "overlap_margin")
         layout.prop(props_structure, "subd", text='Overlap detection accuracy')
@@ -111,9 +121,8 @@ class STRA_PT_Joint(Panel):
         r.scale_y = 2
         if props_structure.progress > 0.0 and props_structure.progress < 1.0:
             r.label(text=f"Progress: {props_structure.progress*100:.2f}%")
-        else:
-            txt_button = 'Regenerate joints and apply' if generated else 'Generate joints'
-            r.operator("stra.structure_generate", icon='MOD_MESHDEFORM', text=txt_button)
+        txt_button = 'Regenerate joints and apply' if generated else f'Generate between {mesh_amount} objects'
+        r.operator("stra.structure_generate", icon='MOD_MESHDEFORM', text=txt_button)
 
 
 class STRA_PT_Collider(Panel):
