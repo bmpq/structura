@@ -1,6 +1,45 @@
 import bpy
 from bpy.types import Panel, Operator, PropertyGroup
 from . import utils
+import bmesh
+
+
+class STRA_PT_Wireframe(Panel):
+    bl_idname = "STRA_PT_Wireframe"
+    bl_label = "Wireframe generator"
+    bl_space_type = 'VIEW_3D'
+    bl_region_type = 'UI'
+    bl_category = "Structura"
+    bl_context = "objectmode"
+
+    def draw(self, context):
+        layout = self.layout
+        props = context.scene.stra_props_wireframe
+
+        edges = 0
+
+        for ob in context.selected_objects:
+            if ob.type == 'MESH':
+                if 'collider' in ob.name:
+                    ob = ob.parent
+                bm = bmesh.new()
+                bm.from_mesh(ob.data)
+                bm.edges.ensure_lookup_table()
+                for edge in bm.edges:
+                    edges += 1
+
+        layout.label(text=f'Selected edges: {edges}')
+
+        if edges == 0:
+            return
+
+        layout.prop(props, "thickness")
+
+        txt_gen = f'Generate {edges} objects'
+
+        r = layout.row()
+        r.scale_y = 2
+        r.operator("stra.wireframe_generate", icon="MOD_WIREFRAME", text=txt_gen)
 
 
 class STRA_PT_Joint(Panel):
@@ -9,6 +48,7 @@ class STRA_PT_Joint(Panel):
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_category = "Structura"
+    bl_context = "objectmode"
 
     def draw(self, context):
         layout = self.layout
@@ -82,6 +122,7 @@ class STRA_PT_Collider(Panel):
     bl_category = "Structura"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
+    bl_context = "objectmode"
 
     def draw(self, context):
         layout = self.layout

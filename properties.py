@@ -1,5 +1,14 @@
 import bpy
 from bpy.types import PropertyGroup
+from . import utils
+
+class STRA_PGT_Wireframe(PropertyGroup):
+    thickness: bpy.props.FloatProperty(
+        name="Thickness",
+        min=0.001,
+        max=1,
+        default=0.1
+    )
 
 
 class STRA_PGT_Viewport(PropertyGroup):
