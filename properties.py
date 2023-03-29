@@ -5,9 +5,11 @@ from . import utils
 class STRA_PGT_Wireframe(PropertyGroup):
     thickness: bpy.props.FloatProperty(
         name="Thickness",
-        min=0.001,
-        max=1,
-        default=0.1
+        min=0,
+        soft_min=0.001,
+        soft_max=1,
+        default=0.1,
+        precision=6
     )
 
 
@@ -33,14 +35,14 @@ class STRA_PGT_Structure(PropertyGroup):
     overlap_margin: bpy.props.FloatProperty(
         name="Overlap margin",
         min=0,
-        max=10,
-        default=0.0
+        soft_max=10,
+        default=1.0
     )
     subd: bpy.props.IntProperty(
         name="Subdivision cuts",
         description='The accuracy of finding overlap points, useful for low poly meshes',
         min=0,
-        max=100,
+        soft_max=100,
         default=4
     )
     progress: bpy.props.FloatProperty(
@@ -69,13 +71,13 @@ class STRA_PGT_Joint(PropertyGroup):
     leeway_linear: bpy.props.FloatProperty(
         name="Linear range",
         min=0.0,
-        max=1.0,
+        soft_max=1.0,
         default=0.01,
     )
     leeway_angular: bpy.props.FloatProperty(
         name="Angular range",
         min=0.0,
-        max=180.0,
+        soft_max=180.0,
         default=1
     )
 

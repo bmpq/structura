@@ -174,7 +174,11 @@ class STRA_PT_Collider(Panel):
                        icon='XRAY' if props_viewport.show_in_front else 'CUBE', text='')
             r.operator("stra.viewport_collider_detect", icon='ALIGN_LEFT', text='')
 
-        layout.label(text=f'{mesh_amount} mesh selected ({rb_amount} RB):')
+        r = layout.row()
+        r.label(text=f'Collider shapes in')
+        r = layout.row()
+        r.scale_y = 0.5
+        r.label(text=f'{mesh_amount} selected object(s):')
 
         if mesh_amount == 0:
             return
@@ -184,15 +188,9 @@ class STRA_PT_Collider(Panel):
         for sh in sh_amount:
             if sh_amount[sh] == 0:
                 continue
-            r = b.row()
-            r.scale_y = 0.7
-            c1 = r.column()
-            c1.alignment = 'LEFT'
-            c1.label(text=f'{sh.name}')
-
-            c2 = r.column()
-            c2.alignment = 'RIGHT'
-            c2.label(text=f'{sh_amount[sh]}')
+            utils.draw_list_entry(b, sh.name, sh_amount[sh])
+        if mesh_amount > rb_amount:
+            utils.draw_list_entry(b, '[No rigid body]', str(mesh_amount - rb_amount))
 
         layout.separator(factor=1)
 
@@ -207,4 +205,6 @@ class STRA_PT_Collider(Panel):
             r.label(text=f"Progress: {props_collider.progress*100:.2f}%")
         else:
             txt = f'Generate colliders for {mesh_amount} object(s)' if props_collider.shape == 'COMPOUND' else f'Set to {props_collider.shape} for {mesh_amount} object(s)'
+            if rb_amount < mesh_amount:
+                txt = f'Add rigid body to {mesh_amount - rb_amount} object(s)'
             r.operator("stra.collider_generate", icon='MESH_ICOSPHERE', text=txt)

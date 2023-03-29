@@ -32,3 +32,14 @@ def get_parent_collection(collection):
         for child in parent.children_recursive:
             if child == collection:
                 return parent
+
+def draw_list_entry(b, left, right):
+    r = b.row()
+    r.scale_y = 0.7
+    c1 = r.column()
+    c1.alignment = 'LEFT'
+    c1.label(text=f'{left}')
+
+    c2 = r.column()
+    c2.alignment = 'RIGHT'
+    c2.label(text=f'{right}')
