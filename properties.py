@@ -9,7 +9,15 @@ class STRA_PGT_Wireframe(PropertyGroup):
         soft_min=0.001,
         soft_max=1,
         default=0.1,
-        precision=6
+        precision=3,
+        step=1
+    )
+    prune: bpy.props.FloatProperty(
+        name="Prune",
+        soft_min=0,
+        default=0.1,
+        precision=3,
+        step=1
     )
 
 
@@ -36,7 +44,9 @@ class STRA_PGT_Structure(PropertyGroup):
         name="Overlap margin",
         min=0,
         soft_max=10,
-        default=1.0
+        default=0.1,
+        precision=3,
+        step=1
     )
     subd: bpy.props.IntProperty(
         name="Subdivision cuts",

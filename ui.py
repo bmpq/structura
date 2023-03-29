@@ -36,6 +36,7 @@ class STRA_PT_Wireframe(Panel):
         if edges == 0:
             return
 
+        layout.prop(props, "prune")
         layout.prop(props, "thickness")
 
         txt_gen = f'Generate {edges} edge objects'
@@ -69,7 +70,7 @@ class STRA_PT_Joint(Panel):
         if 'joints' in col_selected.name:
             col_selected = utils.get_parent_collection(col_selected)
 
-        col_joints = col_selected.children.get(col_selected.name + 'STRA_JOINTS')
+        col_joints = col_selected.children.get(col_selected.name + '_STRA_JOINTS')
         generated = col_joints is not None and len(col_joints.objects) > 0
 
         if col_selected == context.scene.collection:
