@@ -4,49 +4,6 @@ from mathutils.bvhtree import BVHTree
 from bpy.types import Operator
 
 
-class STRA_OT_Viewport_collider_hide(Operator):
-    bl_idname = "stra.viewport_collider_hide"
-    bl_label = "Visible"
-
-    def execute(self, context):
-        props = context.scene.stra_props_viewport
-        props.hide = not props.hide
-        for ob in bpy.data.objects:
-            if 'collider' in ob.name:
-                ob.hide_viewport = props.hide
-                ob.hide_render = props.hide
-
-        return {'FINISHED'}
-
-
-class STRA_OT_Viewport_collider_selectabe(Operator):
-    bl_idname = "stra.viewport_collider_selectable"
-    bl_label = "Selectable"
-
-    def execute(self, context):
-        props = context.scene.stra_props_viewport
-        props.selectable = not props.selectable
-        for ob in bpy.data.objects:
-            if 'collider' in ob.name:
-                ob.hide_select = not props.selectable
-
-        return {'FINISHED'}
-
-
-class STRA_OT_Viewport_collider_in_front(Operator):
-    bl_idname = "stra.viewport_collider_show_in_front"
-    bl_label = "In front"
-
-    def execute(self, context):
-        props = context.scene.stra_props_viewport
-        props.show_in_front = not props.show_in_front
-        for ob in bpy.data.objects:
-            if 'collider' in ob.name:
-                ob.show_in_front = props.show_in_front
-
-        return {'FINISHED'}
-
-
 class STRA_OT_Viewport_collider_detect(Operator):
     bl_idname = "stra.viewport_collider_detect"
     bl_label = "Print collider overlaps"
@@ -91,4 +48,31 @@ class STRA_OT_Viewport_collider_detect(Operator):
 
         if not_found:
             print('No collider overlaps found')
+        return {'FINISHED'}
+
+
+class STRA_OT_Viewport_toggle(Operator):
+    bl_idname = "stra.viewport_toggle"
+    bl_label = "Visibility"
+
+    obname : bpy.props.StringProperty()
+    propname : bpy.props.StringProperty()
+    state : bpy.props.BoolProperty()
+
+    def execute(self, context):
+        props = context.scene.stra_props_viewport
+
+        for ob in bpy.data.objects:
+            if self.obname in ob.name:
+                if self.propname == 'VISIBLE':
+                    props.hide = self.state
+                    ob.hide_viewport = self.state
+                    ob.hide_render = self.state
+                elif self.propname == 'SELECTABLE':
+                    props.selectable = self.state
+                    ob.hide_select = not self.state
+                elif self.propname == 'INFRONT':
+                    props.show_in_front = self.state
+                    ob.show_in_front = self.state
+
         return {'FINISHED'}

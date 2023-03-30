@@ -167,13 +167,23 @@ class STRA_PT_Collider(Panel):
         if using_custom_colliders:
             b = layout.box()
             r = b.row()
-            r.operator("stra.viewport_collider_hide",
-                       icon='HIDE_ON' if props_viewport.hide else 'HIDE_OFF', text='')
-            r.operator("stra.viewport_collider_selectable",
-                       icon='RESTRICT_SELECT_OFF' if props_viewport.selectable else 'RESTRICT_SELECT_ON', text='')
-            r.operator("stra.viewport_collider_show_in_front",
-                       icon='XRAY' if props_viewport.show_in_front else 'CUBE', text='')
-            r.operator("stra.viewport_collider_detect", icon='ALIGN_LEFT', text='')
+            args = r.operator("stra.viewport_toggle", icon='HIDE_ON' if props_viewport.hide else 'HIDE_OFF', text='')
+            args.obname = 'collider'
+            args.propname = 'VISIBLE'
+            args.state = not props_viewport.hide
+
+            args = r.operator("stra.viewport_toggle", icon='RESTRICT_SELECT_OFF' if props_viewport.selectable else 'RESTRICT_SELECT_ON', text='')
+            args.obname = 'collider'
+            args.propname = 'SELECTABLE'
+            args.state = not props_viewport.selectable
+
+            args = r.operator("stra.viewport_toggle", icon='XRAY' if props_viewport.show_in_front else 'MATCUBE', text='')
+            args.obname = 'collider'
+            args.propname = 'INFRONT'
+            args.state = not props_viewport.show_in_front
+
+            r.operator("stra.viewport_collider_detect",
+                       icon='ALIGN_LEFT', text='')
 
         r = layout.row()
         r.label(text=f'Collider shapes in')

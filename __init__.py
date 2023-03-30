@@ -25,9 +25,7 @@ classes = [
     properties.STRA_PGT_Viewport,
     properties.STRA_PGT_Wireframe,
 
-    viewport.STRA_OT_Viewport_collider_in_front,
-    viewport.STRA_OT_Viewport_collider_selectabe,
-    viewport.STRA_OT_Viewport_collider_hide,
+    viewport.STRA_OT_Viewport_toggle,
     viewport.STRA_OT_Viewport_collider_detect,
 
     ops_structure.STRA_OT_Generate_Structure,
