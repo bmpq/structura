@@ -37,6 +37,7 @@ def move_coords(coord1, coord2, dist_delta):
 class STRA_OT_Generate_Wireframe(Operator):
     bl_idname = "stra.wireframe_generate"
     bl_label = "Generate wireframe"
+    bl_options = {"UNDO_GROUPED"}
 
     def execute(self, context):
         props = context.scene.stra_props_wireframe

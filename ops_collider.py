@@ -18,6 +18,7 @@ class STRA_OT_Select_Collection(Operator):
 class STRA_OT_Generate_Colliders(Operator):
     bl_idname = "stra.collider_generate"
     bl_label = "Generate colliders"
+    bl_options = {"UNDO_GROUPED"}
 
     def execute(self, context):
         context.scene.frame_current = 0

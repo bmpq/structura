@@ -42,7 +42,7 @@ def get_bvh(collection, use_overlap_margin, overlap_margin, subd):
     for obj in collection.objects:
         if obj.type != 'MESH':
             continue
-        if 'collider' in obj.name:
+        if 'STRA_COLLIDER' in obj.name:
             continue
 
         bm = bmesh.new()
@@ -72,6 +72,7 @@ def get_bvh(collection, use_overlap_margin, overlap_margin, subd):
 class STRA_OT_Modify_Structure(Operator):
     bl_idname = "stra.structure_modify"
     bl_label = "Modify structure"
+    bl_options = {"UNDO_GROUPED"}
 
     def execute(self, context):
         props = context.scene.stra_props_joint
@@ -93,6 +94,7 @@ class STRA_OT_Modify_Structure(Operator):
 class STRA_OT_Generate_Structure(Operator):
     bl_idname = "stra.structure_generate"
     bl_label = "Generate structure"
+    bl_options = {"UNDO_GROUPED"}
 
     def execute(self, context):
         props = context.scene.stra_props_structure
