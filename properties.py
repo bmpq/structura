@@ -21,9 +21,24 @@ class STRA_PGT_Wireframe(PropertyGroup):
     )
 
 
-class STRA_PGT_Viewport(PropertyGroup):
+class STRA_PGT_Viewport_Collider(PropertyGroup):
     hide: bpy.props.BoolProperty(
-        name="Toggle collider viewport and render visibility",
+        name="Toggle viewport and render visibility",
+        default=False
+    )
+    selectable: bpy.props.BoolProperty(
+        name="Toggle selectable in viewport",
+        default=False
+    )
+    show_in_front: bpy.props.BoolProperty(
+        name="Toggle in front",
+        default=True
+    )
+
+
+class STRA_PGT_Viewport_Joint(PropertyGroup):
+    hide: bpy.props.BoolProperty(
+        name="Toggle viewport and render visibility",
         default=False
     )
     selectable: bpy.props.BoolProperty(

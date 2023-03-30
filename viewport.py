@@ -60,19 +60,32 @@ class STRA_OT_Viewport_toggle(Operator):
     state : bpy.props.BoolProperty()
 
     def execute(self, context):
-        props = context.scene.stra_props_viewport
+        if self.obname == 'STRA_JOINT':
+            props = context.scene.stra_props_viewport_joint
+        else:
+            props = context.scene.stra_props_viewport_collider
 
-        for ob in bpy.data.objects:
-            if self.obname in ob.name:
-                if self.propname == 'VISIBLE':
-                    props.hide = self.state
-                    ob.hide_viewport = self.state
-                    ob.hide_render = self.state
-                elif self.propname == 'SELECTABLE':
-                    props.selectable = self.state
-                    ob.hide_select = not self.state
-                elif self.propname == 'INFRONT':
-                    props.show_in_front = self.state
-                    ob.show_in_front = self.state
+        if self.propname == 'VISIBLE':
+            props.hide = self.state
+        elif self.propname == 'SELECTABLE':
+            props.selectable = self.state
+        elif self.propname == 'INFRONT':
+            props.show_in_front = self.state
+
+        refresh(self.obname)
 
         return {'FINISHED'}
+
+
+def refresh(obname):
+    if obname == 'STRA_JOINT':
+        props = bpy.context.scene.stra_props_viewport_joint
+    else:
+        props = bpy.context.scene.stra_props_viewport_collider
+
+    for ob in bpy.data.objects:
+        if obname in ob.name:
+            ob.hide_viewport = props.hide
+            ob.hide_render = props.hide
+            ob.hide_select = not props.selectable
+            ob.show_in_front = props.show_in_front

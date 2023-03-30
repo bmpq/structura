@@ -2,7 +2,17 @@ import bpy
 import bmesh
 from bpy.types import Operator
 from mathutils.bvhtree import BVHTree
-from . import utils
+from . import utils, viewport
+
+
+class STRA_OT_Select_Collection(Operator):
+    bl_idname = "stra.collection_select_objects"
+    bl_label = "Select all objects in collection"
+
+    def execute(self, context):
+        for ob in context.collection.objects:
+            ob.select_set(True)
+        return {'FINISHED'}
 
 
 class STRA_OT_Generate_Colliders(Operator):
@@ -23,7 +33,7 @@ class STRA_OT_Generate_Colliders(Operator):
                 if ob.type != 'MESH':
                     continue
 
-                if 'collider' in ob.name:
+                if 'STRA_COLLIDER' in ob.name:
                     ob = ob.parent
 
                 bm = bmesh.new()
@@ -43,7 +53,10 @@ class STRA_OT_Generate_Colliders(Operator):
 
         index = 0
         for ob in context.selected_objects:
-            if 'collider' in ob.name:
+            if ob is None:
+                continue
+
+            if 'STRA_COLLIDER' in ob.name:
                 ob = ob.parent
 
             if ob.type != 'MESH':
@@ -73,14 +86,15 @@ class STRA_OT_Generate_Colliders(Operator):
                     verts=bm.verts
                 )
 
-                new_me = bpy.data.meshes.new(ob.name + "_collider")
+                new_me = bpy.data.meshes.new(ob.name + "_STRA_COLLIDER")
                 bm.to_mesh(new_me)
 
                 bmesh.ops.transform(bm, matrix=ob.matrix_world, verts=bm.verts)
                 trees.append((ob, BVHTree.FromBMesh(bm)))
                 bm.free()
 
-                new_ob = bpy.data.objects.new(ob.name + "_collider", new_me)
+                new_ob = bpy.data.objects.new(
+                    ob.name + "_STRA_COLLIDER", new_me)
                 if 'joint' in context.collection.name:
                     utils.get_parent_collection(context.collection).objects.link(new_ob)
                 else:
@@ -97,9 +111,6 @@ class STRA_OT_Generate_Colliders(Operator):
                 bpy.ops.rigidbody.object_add()
                 new_ob.rigid_body.collision_shape = 'MESH'
                 new_ob.rigid_body.collision_margin = 0
-
-                new_ob.show_in_front = context.scene.stra_props_viewport.show_in_front
-                new_ob.hide_select = not context.scene.stra_props_viewport.selectable
 
                 index += 1
                 props.progress = index / len(mesh_data)
@@ -119,5 +130,6 @@ class STRA_OT_Generate_Colliders(Operator):
                     if overlap_pairs:
                         print(f'--------WARNING: {obj1.name} collides with {obj2.name}')
 
+        viewport.refresh('STRA_COLLIDER')
 
         return {'FINISHED'}

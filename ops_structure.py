@@ -4,7 +4,7 @@ from bpy.types import Operator
 import bmesh
 import math
 from mathutils.bvhtree import BVHTree
-from . import utils
+from . import utils, viewport
 
 
 def modify_const(ob, props):
@@ -76,7 +76,7 @@ class STRA_OT_Modify_Structure(Operator):
     def execute(self, context):
         props = context.scene.stra_props_joint
         collection = context.collection
-        if 'joint' in collection.name:
+        if '_STRA_JOINTS' in collection.name:
             collection = utils.get_parent_collection(collection)
 
         bpy.context.scene.frame_current = 0
@@ -146,5 +146,7 @@ class STRA_OT_Generate_Structure(Operator):
             props.progress = (i + 1) / (len(trees))
             bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
             print(f"Progress: {props.progress*100:.2f}%")
+
+        viewport.refresh('STRA_JOINT')
 
         return {'FINISHED'}

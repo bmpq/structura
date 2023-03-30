@@ -23,7 +23,7 @@ class STRA_PT_Wireframe(Panel):
                 layout.label(text='Generated edge selected')
                 return
             if ob.type == 'MESH':
-                if 'collider' in ob.name:
+                if 'STRA_COLLIDER' in ob.name:
                     ob = ob.parent
                 bm = bmesh.new()
                 bm.from_mesh(ob.data)
@@ -65,9 +65,34 @@ class STRA_PT_Joint(Panel):
         layout = self.layout
         props_structure = context.scene.stra_props_structure
         props_joint = context.scene.stra_props_joint
+        props_viewport = context.scene.stra_props_viewport_joint
+
+        generated_joints_on_scene = False
+        for ob in context.scene.objects:
+            if 'STRA_JOINT' in ob.name:
+                generated_joints_on_scene = True
+                break
+
+        if generated_joints_on_scene:
+            b = layout.box()
+            r = b.row()
+            args = r.operator("stra.viewport_toggle", icon='HIDE_ON' if props_viewport.hide else 'HIDE_OFF', text='')
+            args.obname = 'STRA_JOINT'
+            args.propname = 'VISIBLE'
+            args.state = not props_viewport.hide
+
+            args = r.operator("stra.viewport_toggle", icon='RESTRICT_SELECT_OFF' if props_viewport.selectable else 'RESTRICT_SELECT_ON', text='')
+            args.obname = 'STRA_JOINT'
+            args.propname = 'SELECTABLE'
+            args.state = not props_viewport.selectable
+
+            args = r.operator("stra.viewport_toggle", icon='XRAY' if props_viewport.show_in_front else 'MATCUBE', text='')
+            args.obname = 'STRA_JOINT'
+            args.propname = 'INFRONT'
+            args.state = not props_viewport.show_in_front
 
         col_selected = context.collection
-        if 'joints' in col_selected.name:
+        if 'STRA_JOINTS' in col_selected.name:
             col_selected = utils.get_parent_collection(col_selected)
 
         col_joints = col_selected.children.get(col_selected.name + '_STRA_JOINTS')
@@ -83,7 +108,7 @@ class STRA_PT_Joint(Panel):
         for ob in col_selected.objects:
             if ob.type != 'MESH':
                 continue
-            if 'collider' in ob.name:
+            if 'STRA_COLLIDER' in ob.name:
                 continue
             mesh_amount += 1
 
@@ -94,6 +119,7 @@ class STRA_PT_Joint(Panel):
 
         if generated:
             layout.label(text=f'{len(col_joints.objects)} generated joint constraints')
+
         r = layout.row()
         c1 = r.column()
         c2 = r.column()
@@ -137,7 +163,7 @@ class STRA_PT_Collider(Panel):
     def draw(self, context):
         layout = self.layout
         props_collider = context.scene.stra_props_collider
-        props_viewport = context.scene.stra_props_viewport
+        props_viewport = context.scene.stra_props_viewport_collider
 
         mesh_amount = 0
         rb_amount = 0
@@ -145,7 +171,7 @@ class STRA_PT_Collider(Panel):
         sh_amount = dict.fromkeys(rb_shapes, 0)
         for ob in context.selected_objects:
             if ob.type == 'MESH':
-                if 'collider' in ob.name:
+                if 'STRA_COLLIDER' in ob.name:
                     ob = ob.parent
                 mesh_amount += 1
                 rb = ob.rigid_body
@@ -158,7 +184,7 @@ class STRA_PT_Collider(Panel):
                         break
 
         using_custom_colliders = False
-        for ob in bpy.data.objects:
+        for ob in context.scene.objects:
             if ob.rigid_body:
                 if ob.rigid_body.collision_shape == 'COMPOUND':
                     using_custom_colliders = True
@@ -168,23 +194,21 @@ class STRA_PT_Collider(Panel):
             b = layout.box()
             r = b.row()
             args = r.operator("stra.viewport_toggle", icon='HIDE_ON' if props_viewport.hide else 'HIDE_OFF', text='')
-            args.obname = 'collider'
+            args.obname = 'STRA_COLLIDER'
             args.propname = 'VISIBLE'
             args.state = not props_viewport.hide
 
             args = r.operator("stra.viewport_toggle", icon='RESTRICT_SELECT_OFF' if props_viewport.selectable else 'RESTRICT_SELECT_ON', text='')
-            args.obname = 'collider'
+            args.obname = 'STRA_COLLIDER'
             args.propname = 'SELECTABLE'
             args.state = not props_viewport.selectable
 
             args = r.operator("stra.viewport_toggle", icon='XRAY' if props_viewport.show_in_front else 'MATCUBE', text='')
-            args.obname = 'collider'
+            args.obname = 'STRA_COLLIDER'
             args.propname = 'INFRONT'
             args.state = not props_viewport.show_in_front
 
-            r.operator("stra.viewport_collider_detect",
-                       icon='ALIGN_LEFT', text='')
-
+        layout.operator("stra.collection_select_objects", icon='RESTRICT_SELECT_OFF')
         r = layout.row()
         r.label(text=f'Collider shapes in')
         r = layout.row()
