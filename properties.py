@@ -43,7 +43,7 @@ class STRA_PGT_Viewport_Joint(PropertyGroup):
     )
     selectable: bpy.props.BoolProperty(
         name="Toggle selectable in viewport",
-        default=False
+        default=True
     )
     show_in_front: bpy.props.BoolProperty(
         name="Toggle in front",
@@ -53,7 +53,8 @@ class STRA_PGT_Viewport_Joint(PropertyGroup):
 
 class STRA_PGT_Structure(PropertyGroup):
     use_overlap_margin: bpy.props.BoolProperty(
-        name="Overlap margin"
+        name="Overlap margin",
+        default=True
     )
     overlap_margin: bpy.props.FloatProperty(
         name="Overlap margin",
@@ -89,7 +90,7 @@ class STRA_PGT_Joint(PropertyGroup):
     )
     use_local_collisions: bpy.props.BoolProperty(
         name="Enable local collisions",
-        default=False,
+        default=True,
         description='Enable collisions between jointed objects'
     )
     break_threshold: bpy.props.FloatProperty(

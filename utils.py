@@ -2,32 +2,19 @@ from gc import collect
 import bpy
 
 
-def clear_collection(col_clear):
-    for child_col in col_clear.children:
-        clear_collection(child_col)
-    for ob in col_clear.objects:
-        for col in ob.users_collection:
-            col.objects.unlink(ob)
+def get_collection(parent_col, name):
+    col = parent_col.children.get(name)
+    if col is None:
+        col = bpy.data.collections.new(name)
+        parent_col.children.link(col)
+    return col
 
 
-def reset_collection(parent_collection, name):
-    col_reset = bpy.data.collections.get(name)
-    if col_reset is None:
-        col_reset = bpy.data.collections.new(name)
-        parent_collection.children.link(col_reset)
-    else:
-        clear_collection(col_reset)
+def get_collection_joints(context):
+    col = get_collection(context.scene.collection, 'STRUCTURA')
+    col_joints = get_collection(col, 'STRUCTURA_JOINTS')
+    return col_joints
 
-    bpy.ops.outliner.orphans_purge(do_local_ids=True)
-
-    return col_reset
-
-
-def get_parent_collection(collection):
-    for parent in bpy.data.collections:
-        for child in parent.children_recursive:
-            if child == collection:
-                return parent
 
 def draw_list_entry(b, left, right):
     r = b.row()

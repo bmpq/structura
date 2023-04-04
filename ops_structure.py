@@ -1,3 +1,4 @@
+from ctypes import util
 import bpy
 from bpy.types import Operator
 
@@ -37,9 +38,9 @@ def modify_const(ob, props):
     ob.rigid_body_constraint.limit_lin_z_upper = lin_max
 
 
-def get_bvh(collection, use_overlap_margin, overlap_margin, subd):
+def get_bvh(objects, use_overlap_margin, overlap_margin, subd):
     trees = []
-    for obj in collection.objects:
+    for obj in objects:
         if obj.type != 'MESH':
             continue
         if 'STRA_COLLIDER' in obj.name:
@@ -69,6 +70,47 @@ def get_bvh(collection, use_overlap_margin, overlap_margin, subd):
     return trees
 
 
+def get_joints_by_rb(obj_rb, col_joints):
+    joint_objs = []
+
+    for ob in col_joints.objects:
+        const = ob.rigid_body_constraint
+        if const is None:
+            continue
+        if const.object1 == obj_rb or const.object2 == obj_rb:
+            joint_objs.append(ob)
+            continue
+
+    return joint_objs
+
+
+def create_joint(col_joints, obj1, obj2, loc):
+    empty_name = f'STRA_JOINT'
+    empty = bpy.data.objects.new(empty_name, None)
+    col_joints.objects.link(empty)
+
+    bpy.context.view_layer.objects.active = empty
+    bpy.ops.rigidbody.constraint_add()
+
+    empty.location = loc
+
+    bpy.context.object.rigid_body_constraint.object1 = obj1
+    bpy.context.object.rigid_body_constraint.object2 = obj2
+
+    empty.empty_display_size = 0.2
+
+    return empty
+
+
+def remove_existing_joints(col_joints, obj1, obj2):
+    existing_joints = get_joints_by_rb(obj1, col_joints)
+    for ex_joint in existing_joints:
+        rbc = ex_joint.rigid_body_constraint
+        if rbc.object1 == obj2 or rbc.object2 == obj2:
+            for col in ex_joint.users_collection:
+                col.objects.unlink(ex_joint)
+
+
 class STRA_OT_Modify_Structure(Operator):
     bl_idname = "stra.structure_modify"
     bl_label = "Modify structure"
@@ -76,17 +118,18 @@ class STRA_OT_Modify_Structure(Operator):
 
     def execute(self, context):
         props = context.scene.stra_props_joint
-        collection = context.collection
-        if '_STRA_JOINTS' in collection.name:
-            collection = utils.get_parent_collection(collection)
 
         bpy.context.scene.frame_current = 0
         bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
 
-        col_joints = collection.children.get(collection.name + '_STRA_JOINTS')
+        col_joints = utils.get_collection_joints(context)
 
-        for ob in col_joints.objects:
-            modify_const(ob, props)
+        for ob in context.selected_objects:
+            if ob.rigid_body is None:
+                continue
+            joints = get_joints_by_rb(ob, col_joints)
+            for ob in joints:
+                modify_const(ob, props)
 
         return {'FINISHED'}
 
@@ -99,16 +142,21 @@ class STRA_OT_Generate_Structure(Operator):
     def execute(self, context):
         props = context.scene.stra_props_structure
         props_const = context.scene.stra_props_joint
-        collection = context.collection
-        if 'joint' in collection.name:
-            collection = utils.get_parent_collection(collection)
+
+        col_joints = utils.get_collection_joints(context)
 
         bpy.context.scene.frame_current = 0
         bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
 
-        trees = get_bvh(collection, props.overlap_margin, props.overlap_margin, props.subd)
-        col_empties = utils.reset_collection(collection, collection.name + '_STRA_JOINTS')
+        trees = get_bvh(context.selected_objects, props.use_overlap_margin, props.overlap_margin, props.subd)
 
+        for obj1 in context.selected_objects:
+            for obj2 in context.selected_objects:
+                if obj1 == obj2:
+                    continue
+                remove_existing_joints(col_joints, obj1, obj2)
+
+        joints_generated_amount = 0
         for i in range(len(trees)):
             for j in range(i + 1, len(trees)):
                 tree1, (obj1, bm1) = trees[i]
@@ -130,25 +178,17 @@ class STRA_OT_Generate_Structure(Operator):
                                     min_dist = (v1.co - v2.co).length
                                     loc = (v1.co + v2.co) / 2
 
-                    empty_name = f'{obj1.name}_{obj2.name}_STRA_JOINT'
-                    empty = bpy.data.objects.new(empty_name, None)
-                    empty.empty_display_size = 0.2
+                    joint = create_joint(col_joints, obj1, obj2, loc)
+                    modify_const(joint, props_const)
 
-                    empty.location = loc
-                    col_empties.objects.link(empty)
-
-                    bpy.context.view_layer.objects.active = empty
-                    bpy.ops.rigidbody.constraint_add(type=props_const.type)
-
-                    modify_const(empty, props_const)
-
-                    bpy.context.object.rigid_body_constraint.object1 = obj1
-                    bpy.context.object.rigid_body_constraint.object2 = obj2
+                    joints_generated_amount += 1
 
             props.progress = (i + 1) / (len(trees))
             bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
             print(f"Progress: {props.progress*100:.2f}%")
 
         viewport.refresh('STRA_JOINT')
+
+        print(f'RESULT: Generated {joints_generated_amount} joints')
 
         return {'FINISHED'}

@@ -1,6 +1,6 @@
 import bpy
 from bpy.types import Panel, Operator, PropertyGroup
-from . import utils
+from . import utils, ops_structure
 import bmesh
 
 
@@ -91,34 +91,21 @@ class STRA_PT_Joint(Panel):
             args.propname = 'INFRONT'
             args.state = not props_viewport.show_in_front
 
-        col_selected = context.collection
-        if 'STRA_JOINTS' in col_selected.name:
-            col_selected = utils.get_parent_collection(col_selected)
-
-        col_joints = col_selected.children.get(col_selected.name + '_STRA_JOINTS')
-        generated = col_joints is not None and len(col_joints.objects) > 0
-
-        if col_selected == context.scene.collection:
-            r = layout.row()
-            r.alert = True
-            r.label(text='Scene collection selected')
-            return
+        col_joints = utils.get_collection_joints(context)
+        generated = len(col_joints.objects) > 0
 
         mesh_amount = 0
-        for ob in col_selected.objects:
+        for ob in context.selected_objects:
             if ob.type != 'MESH':
                 continue
             if 'STRA_COLLIDER' in ob.name:
                 continue
             mesh_amount += 1
 
-        layout.label(text=f'{mesh_amount} mesh object(s) in [{col_selected.name}]')
+        layout.label(text=f'{mesh_amount} mesh object(s) selected')
 
         if mesh_amount < 2:
             return
-
-        if generated:
-            layout.label(text=f'{len(col_joints.objects)} generated joint constraints')
 
         r = layout.row()
         c1 = r.column()
@@ -132,24 +119,50 @@ class STRA_PT_Joint(Panel):
         layout.prop(props_joint, "use_local_collisions")
         layout.prop(props_joint, "break_threshold")
 
+        joint_amount = 0
         if generated:
+            pairs = {}
+            for ob in context.selected_objects:
+                pairs[ob] = []
+            for ob1 in context.selected_objects:
+                if ob1.rigid_body is None:
+                    continue
+                joints = ops_structure.get_joints_by_rb(ob1, col_joints)
+                if len(joints) == 0:
+                    continue
+                for ob2 in context.selected_objects:
+                    if ob2 in pairs[ob1] or ob1 in pairs[ob2]:
+                        continue
+                    if ob2.rigid_body is None or ob1 == ob2:
+                        continue
+
+                    for j in joints:
+                        rbc = j.rigid_body_constraint
+                        if rbc.object1 == ob2 or rbc.object2 == ob2:
+                            joint_amount += 1
+                            pairs[ob1].append(ob2)
+                            pairs[ob2].append(ob1)
+                            break
+
+        if joint_amount > 0:
             r = layout.row()
             r.scale_y = 2
-            r.operator("stra.structure_modify", icon='MOD_NORMALEDIT', text=f'Apply to {len(col_joints.objects)} joint(s)')
+            r.operator("stra.structure_modify", icon='MOD_NORMALEDIT', text=f'Apply to {joint_amount} joint(s)')
 
         layout.separator(factor=1)
 
-        layout.prop(props_structure, "use_overlap_margin", text='Use overlap margin (slower)')
+        layout.prop(props_structure, "use_overlap_margin", text='Use overlap margin')
         if props_structure.use_overlap_margin:
             layout.prop(props_structure, "overlap_margin")
         layout.prop(props_structure, "subd", text='Overlap detection accuracy')
 
-        r = layout.row()
-        r.scale_y = 2
-        if props_structure.progress > 0.0 and props_structure.progress < 1.0:
-            r.label(text=f"Progress: {props_structure.progress*100:.2f}%")
-        txt_button = 'Regenerate joints and apply' if generated else f'Generate between {mesh_amount} objects'
-        r.operator("stra.structure_generate", icon='MOD_MESHDEFORM', text=txt_button)
+        if mesh_amount > 1:
+            r = layout.row()
+            r.scale_y = 2
+            if props_structure.progress > 0.0 and props_structure.progress < 1.0:
+                r.label(text=f"Progress: {props_structure.progress*100:.2f}%")
+            txt_button = f'Regenerate between {mesh_amount} objects' if joint_amount > 0 else f'Generate between {mesh_amount} objects'
+            r.operator("stra.structure_generate", icon='MOD_MESHDEFORM', text=txt_button)
 
 
 class STRA_PT_Collider(Panel):
