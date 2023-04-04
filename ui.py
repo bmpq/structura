@@ -121,33 +121,19 @@ class STRA_PT_Joint(Panel):
 
         joint_amount = 0
         if generated:
-            pairs = {}
-            for ob in context.selected_objects:
-                pairs[ob] = []
             for ob1 in context.selected_objects:
                 if ob1.rigid_body is None:
                     continue
                 joints = ops_structure.get_joints_by_rb(ob1, col_joints)
                 if len(joints) == 0:
                     continue
-                for ob2 in context.selected_objects:
-                    if ob2 in pairs[ob1] or ob1 in pairs[ob2]:
-                        continue
-                    if ob2.rigid_body is None or ob1 == ob2:
-                        continue
-
-                    for j in joints:
-                        rbc = j.rigid_body_constraint
-                        if rbc.object1 == ob2 or rbc.object2 == ob2:
-                            joint_amount += 1
-                            pairs[ob1].append(ob2)
-                            pairs[ob2].append(ob1)
-                            break
+                joint_amount += 1
+                break
 
         if joint_amount > 0:
             r = layout.row()
             r.scale_y = 2
-            r.operator("stra.structure_modify", icon='MOD_NORMALEDIT', text=f'Apply to {joint_amount} joint(s)')
+            r.operator("stra.structure_modify", icon='MOD_NORMALEDIT', text=f'Apply to joints of selected objects')
 
         layout.separator(factor=1)
 
