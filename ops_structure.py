@@ -134,6 +134,24 @@ class STRA_OT_Modify_Structure(Operator):
         return {'FINISHED'}
 
 
+def top_k_closest_pairs(list1, list2, k):
+    pairs = []
+    for p1 in list1:
+        for p2 in list2:
+            dist = (p1 - p2).length
+            pairs.append((dist, (p1, p2)))
+
+    pairs.sort()
+
+    top = [pair[1] for pair in pairs[:k]]
+    result = []
+    for p in top:
+        result.append(p[0])
+        result.append(p[1])
+
+    return result
+
+
 class STRA_OT_Generate_Structure(Operator):
     bl_idname = "stra.structure_generate"
     bl_label = "Generate structure"
@@ -163,20 +181,22 @@ class STRA_OT_Generate_Structure(Operator):
                 tree2, (obj2, bm2) = trees[j]
                 overlap_pairs = tree1.overlap(tree2)
                 if overlap_pairs:
-                    face1 = bm1.faces[overlap_pairs[0][0]]
-                    face2 = bm2.faces[overlap_pairs[0][1]]
-                    loc = (face1.verts[0].co + face2.verts[0].co) / 2
-                    min_dist = (face1.verts[0].co - face2.verts[0].co).length
-
+                    coords_list1 = []
+                    coords_list2 = []
                     for p1, p2 in overlap_pairs:
                         face1 = bm1.faces[p1]
                         face2 = bm2.faces[p2]
-
                         for v1 in face1.verts:
-                            for v2 in face2.verts:
-                                if (v1.co - v2.co).length < min_dist:
-                                    min_dist = (v1.co - v2.co).length
-                                    loc = (v1.co + v2.co) / 2
+                            coords_list1.append(v1.co)
+                        for v2 in face2.verts:
+                            coords_list2.append(v2.co)
+
+                        coords_list1.append(face1.calc_center_median_weighted())
+                        coords_list2.append(face2.calc_center_median_weighted())
+
+                    closest_pair = top_k_closest_pairs(coords_list1, coords_list2, 1)
+
+                    loc = (closest_pair[0] + closest_pair[1]) / 2
 
                     joint = create_joint(col_joints, obj1, obj2, loc)
                     modify_const(joint, props_const)
