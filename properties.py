@@ -21,36 +21,6 @@ class STRA_PGT_Wireframe(PropertyGroup):
     )
 
 
-class STRA_PGT_Viewport_Collider(PropertyGroup):
-    hide: bpy.props.BoolProperty(
-        name="Toggle viewport and render visibility",
-        default=False
-    )
-    selectable: bpy.props.BoolProperty(
-        name="Toggle selectable in viewport",
-        default=False
-    )
-    show_in_front: bpy.props.BoolProperty(
-        name="Toggle in front",
-        default=True
-    )
-
-
-class STRA_PGT_Viewport_Joint(PropertyGroup):
-    hide: bpy.props.BoolProperty(
-        name="Toggle viewport and render visibility",
-        default=False
-    )
-    selectable: bpy.props.BoolProperty(
-        name="Toggle selectable in viewport",
-        default=True
-    )
-    show_in_front: bpy.props.BoolProperty(
-        name="Toggle in front",
-        default=True
-    )
-
-
 class STRA_PGT_Structure(PropertyGroup):
     use_overlap_margin: bpy.props.BoolProperty(
         name="Overlap margin",
@@ -58,7 +28,7 @@ class STRA_PGT_Structure(PropertyGroup):
     )
     overlap_margin: bpy.props.FloatProperty(
         name="Overlap margin",
-        min=0,
+        soft_min=0,
         soft_max=10,
         default=0.1,
         precision=3,

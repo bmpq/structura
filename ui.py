@@ -65,31 +65,7 @@ class STRA_PT_Joint(Panel):
         layout = self.layout
         props_structure = context.scene.stra_props_structure
         props_joint = context.scene.stra_props_joint
-        props_viewport = context.scene.stra_props_viewport_joint
 
-        generated_joints_on_scene = False
-        for ob in context.scene.objects:
-            if 'STRA_JOINT' in ob.name:
-                generated_joints_on_scene = True
-                break
-
-        if generated_joints_on_scene:
-            b = layout.box()
-            r = b.row()
-            args = r.operator("stra.viewport_toggle", icon='HIDE_ON' if props_viewport.hide else 'HIDE_OFF', text='')
-            args.obname = 'STRA_JOINT'
-            args.propname = 'VISIBLE'
-            args.state = not props_viewport.hide
-
-            args = r.operator("stra.viewport_toggle", icon='RESTRICT_SELECT_OFF' if props_viewport.selectable else 'RESTRICT_SELECT_ON', text='')
-            args.obname = 'STRA_JOINT'
-            args.propname = 'SELECTABLE'
-            args.state = not props_viewport.selectable
-
-            args = r.operator("stra.viewport_toggle", icon='XRAY' if props_viewport.show_in_front else 'MATCUBE', text='')
-            args.obname = 'STRA_JOINT'
-            args.propname = 'INFRONT'
-            args.state = not props_viewport.show_in_front
 
         col_joints = utils.get_collection_joints(context)
         generated = len(col_joints.objects) > 0
@@ -162,7 +138,6 @@ class STRA_PT_Collider(Panel):
     def draw(self, context):
         layout = self.layout
         props_collider = context.scene.stra_props_collider
-        props_viewport = context.scene.stra_props_viewport_collider
 
         mesh_amount = 0
         rb_amount = 0
@@ -181,31 +156,6 @@ class STRA_PT_Collider(Panel):
                     if sh.identifier == ob.rigid_body.collision_shape:
                         sh_amount[sh] += 1
                         break
-
-        using_custom_colliders = False
-        for ob in context.scene.objects:
-            if ob.rigid_body:
-                if ob.rigid_body.collision_shape == 'COMPOUND':
-                    using_custom_colliders = True
-                    break
-
-        if using_custom_colliders:
-            b = layout.box()
-            r = b.row()
-            args = r.operator("stra.viewport_toggle", icon='HIDE_ON' if props_viewport.hide else 'HIDE_OFF', text='')
-            args.obname = 'STRA_COLLIDER'
-            args.propname = 'VISIBLE'
-            args.state = not props_viewport.hide
-
-            args = r.operator("stra.viewport_toggle", icon='RESTRICT_SELECT_OFF' if props_viewport.selectable else 'RESTRICT_SELECT_ON', text='')
-            args.obname = 'STRA_COLLIDER'
-            args.propname = 'SELECTABLE'
-            args.state = not props_viewport.selectable
-
-            args = r.operator("stra.viewport_toggle", icon='XRAY' if props_viewport.show_in_front else 'MATCUBE', text='')
-            args.obname = 'STRA_COLLIDER'
-            args.propname = 'INFRONT'
-            args.state = not props_viewport.show_in_front
 
         layout.operator("stra.collection_select_objects", icon='RESTRICT_SELECT_OFF')
         r = layout.row()

@@ -201,13 +201,13 @@ class STRA_OT_Generate_Structure(Operator):
                     joint = create_joint(col_joints, obj1, obj2, loc)
                     modify_const(joint, props_const)
 
+                    joint.show_in_front = True
+
                     joints_generated_amount += 1
 
             props.progress = (i + 1) / (len(trees))
             bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
             print(f"Progress: {props.progress*100:.2f}%")
-
-        viewport.refresh('STRA_JOINT')
 
         print(f'RESULT: Generated {joints_generated_amount} joints')
 

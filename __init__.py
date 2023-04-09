@@ -22,11 +22,8 @@ classes = [
     properties.STRA_PGT_Structure,
     properties.STRA_PGT_Joint,
     properties.STRA_PGT_Collider,
-    properties.STRA_PGT_Viewport_Collider,
-    properties.STRA_PGT_Viewport_Joint,
     properties.STRA_PGT_Wireframe,
 
-    viewport.STRA_OT_Viewport_toggle,
     viewport.STRA_OT_Viewport_collider_detect,
 
     ops_structure.STRA_OT_Generate_Structure,
@@ -47,8 +44,6 @@ def register():
     bpy.types.Scene.stra_props_structure = bpy.props.PointerProperty(type=properties.STRA_PGT_Structure)
     bpy.types.Scene.stra_props_joint = bpy.props.PointerProperty(type=properties.STRA_PGT_Joint)
     bpy.types.Scene.stra_props_collider = bpy.props.PointerProperty(type=properties.STRA_PGT_Collider)
-    bpy.types.Scene.stra_props_viewport_collider = bpy.props.PointerProperty(type=properties.STRA_PGT_Viewport_Collider)
-    bpy.types.Scene.stra_props_viewport_joint = bpy.props.PointerProperty(type=properties.STRA_PGT_Viewport_Joint)
     bpy.types.Scene.stra_props_wireframe = bpy.props.PointerProperty(type=properties.STRA_PGT_Wireframe)
 
 
@@ -59,8 +54,6 @@ def unregister():
    del bpy.types.Scene.stra_props_structure
    del bpy.types.Scene.stra_props_joint
    del bpy.types.Scene.stra_props_collider
-   del bpy.types.Scene.stra_props_viewport_collider
-   del bpy.types.Scene.stra_props_viewport_joint
    del bpy.types.Scene.stra_props_wireframe
 
 
