@@ -109,7 +109,7 @@ class STRA_OT_Generate_Colliders(Operator):
             ob.rigid_body.collision_margin = 0
 
             bm = mesh_data[ob]
-            target_map = bmesh.ops.find_doubles(bm, verts=bm.verts, dist=0.01)["targetmap"]
+            target_map = bmesh.ops.find_doubles(bm, verts=bm.verts, dist=0.0001)["targetmap"]
             bmesh.ops.weld_verts(bm, targetmap=target_map)
             bmesh.ops.holes_fill(bm, edges=bm.edges, sides=4)
 
