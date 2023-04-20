@@ -41,6 +41,15 @@ def scale_bmesh(bm, scale):
     # Scale the bmesh along the custom local axis
     bmesh.ops.transform(bm, matrix=mat_transf, verts=bm.verts)
 
+
+def get_verts_only(bm):
+    new_bm = bmesh.new()
+    for v in bm.verts:
+        new_bm.verts.new(v.co)
+    new_bm.verts.ensure_lookup_table()
+    return new_bm
+
+
 class STRA_OT_Generate_Colliders(Operator):
     bl_idname = "stra.collider_generate"
     bl_label = "Generate colliders"
@@ -104,26 +113,30 @@ class STRA_OT_Generate_Colliders(Operator):
             bmesh.ops.weld_verts(bm, targetmap=target_map)
             bmesh.ops.holes_fill(bm, edges=bm.edges, sides=4)
 
-            #bmesh.ops.scale(
-            #    bm,
-            #    vec=props.scale_global,
-            #    verts=bm.verts
-            #)
+            bmesh.ops.scale(
+                bm,
+                vec=props.scale_global,
+                verts=bm.verts
+            )
 
             scale_bmesh(bm, props.scale_custom)
 
+            if props.shape == 'CONVEX':
+                bm = get_verts_only(bm)
+                bmesh.ops.convex_hull(bm, input=bm.verts)
+                bmesh.ops.delete(bm, geom=[v for v in bm.verts if not v.link_edges], context='VERTS')
+
+            trees.append((ob, BVHTree.FromBMesh(bm)))
+
             new_me = bpy.data.meshes.new(ob.name + "_STRA_COLLIDER")
             bm.to_mesh(new_me)
-
-            bmesh.ops.transform(bm, matrix=ob.matrix_world, verts=bm.verts)
-            trees.append((ob, BVHTree.FromBMesh(bm)))
             bm.free()
-
             new_ob = bpy.data.objects.new(ob.name + "_STRA_COLLIDER", new_me)
             col_colliders = utils.get_collection_colliders()
             col_colliders.objects.link(new_ob)
 
             new_ob.parent = ob
+
             bpy.context.view_layer.objects.active = new_ob
             bpy.ops.rigidbody.object_add()
             new_ob.rigid_body.collision_margin = 0
@@ -133,7 +146,6 @@ class STRA_OT_Generate_Colliders(Operator):
                 modifier.mode = "VOXEL"
                 modifier.voxel_size = props.voxel_size
                 bpy.ops.object.modifier_apply(modifier=modifier.name)
-
                 new_ob.rigid_body.collision_shape = 'MESH'
             else:
                 new_ob.rigid_body.collision_shape = 'CONVEX_HULL'
