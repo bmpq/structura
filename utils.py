@@ -1,5 +1,8 @@
 import bpy
 
+OBJNAME_COLLIDER = 'STRA_COLLIDER'
+OBJNAME_JOINT = 'STRA_JOINT'
+
 
 def get_collection(parent_col, name):
     col = parent_col.children.get(name)

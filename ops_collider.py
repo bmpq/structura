@@ -67,7 +67,7 @@ class STRA_OT_Generate_Colliders(Operator):
             if ob.type != 'MESH':
                 continue
 
-            if 'STRA_COLLIDER' in ob.name:
+            if utils.OBJNAME_COLLIDER in ob.name:
                 ob = ob.parent
 
             bm = bmesh.new()
@@ -90,7 +90,7 @@ class STRA_OT_Generate_Colliders(Operator):
             if ob is None:
                 continue
 
-            if 'STRA_COLLIDER' in ob.name:
+            if utils.OBJNAME_COLLIDER in ob.name:
                 ob = ob.parent
 
             if ob.type != 'MESH':
@@ -128,10 +128,10 @@ class STRA_OT_Generate_Colliders(Operator):
 
             trees.append((ob, BVHTree.FromBMesh(bm)))
 
-            new_me = bpy.data.meshes.new(ob.name + "_STRA_COLLIDER")
+            new_me = bpy.data.meshes.new(ob.name + "_" + utils.OBJNAME_COLLIDER)
             bm.to_mesh(new_me)
             bm.free()
-            new_ob = bpy.data.objects.new(ob.name + "_STRA_COLLIDER", new_me)
+            new_ob = bpy.data.objects.new(ob.name + "_" + utils.OBJNAME_COLLIDER, new_me)
             col_colliders = utils.get_collection_colliders()
             col_colliders.objects.link(new_ob)
 

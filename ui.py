@@ -23,7 +23,7 @@ class STRA_PT_Wireframe(Panel):
                 layout.label(text='Generated edge selected')
                 return
             if ob.type == 'MESH':
-                if 'STRA_COLLIDER' in ob.name:
+                if utils.OBJNAME_COLLIDER in ob.name:
                     ob = ob.parent
                 bm = bmesh.new()
                 bm.from_mesh(ob.data)
@@ -74,7 +74,7 @@ class STRA_PT_Joint(Panel):
         for ob in context.selected_objects:
             if ob.type != 'MESH':
                 continue
-            if 'STRA_COLLIDER' in ob.name:
+            if utils.OBJNAME_COLLIDER in ob.name:
                 continue
             mesh_amount += 1
 
@@ -145,7 +145,7 @@ class STRA_PT_Collider(Panel):
         sh_amount = dict.fromkeys(rb_shapes, 0)
         for ob in context.selected_objects:
             if ob.type == 'MESH':
-                if 'STRA_COLLIDER' in ob.name:
+                if utils.OBJNAME_COLLIDER in ob.name:
                     ob = ob.parent
                 mesh_amount += 1
                 rb = ob.rigid_body

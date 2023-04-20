@@ -43,7 +43,7 @@ def get_bvh(objects, use_overlap_margin, overlap_margin, subd):
     for obj in objects:
         if obj.type != 'MESH':
             continue
-        if 'STRA_COLLIDER' in obj.name:
+        if utils.OBJNAME_COLLIDER in obj.name:
             continue
 
         bm = bmesh.new()
@@ -85,7 +85,7 @@ def get_joints_by_rb(obj_rb, col_joints):
 
 
 def create_joint(col_joints, obj1, obj2, loc):
-    empty_name = f'STRA_JOINT'
+    empty_name = utils.OBJNAME_JOINT
     empty = bpy.data.objects.new(empty_name, None)
     col_joints.objects.link(empty)
 
