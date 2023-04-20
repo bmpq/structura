@@ -182,3 +182,12 @@ class STRA_PT_Collider(Panel):
         else:
             txt = f'Generate colliders for {mesh_amount} object(s)'
             r.operator("stra.collider_generate", icon='MESH_ICOSPHERE', text=txt)
+
+        layout.separator(factor=1)
+
+        layout.prop(props_collider, "density")
+
+        r = layout.row()
+        r.scale_y = 2
+        txt = f'Calculate mass for {mesh_amount} object(s)'
+        r.operator("stra.calculate_mass", icon='PHYSICS', text=txt)

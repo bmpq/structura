@@ -172,6 +172,42 @@ class STRA_OT_Generate_Colliders(Operator):
         return {'FINISHED'}
 
 
+def get_child_by_name(ob, name):
+    for child in ob.children:
+        if name in child.name:
+            return child
+
+
+def get_volume(obj):
+    bm = bmesh.new()
+    bm.from_mesh(obj.data)
+    volume = bm.calc_volume()
+    bm.free()
+    return volume
+
+
+class STRA_OT_Calculate_Mass(Operator):
+    bl_idname = "stra.calculate_mass"
+    bl_label = "Calculate Mass"
+    bl_options = {"UNDO_GROUPED"}
+
+    def execute(self, context):
+        for ob in context.selected_objects:
+            if utils.OBJNAME_COLLIDER in ob.name:
+                ob = ob.parent
+
+            collider = get_child_by_name(ob, utils.OBJNAME_COLLIDER)
+            if collider is None:
+                continue
+
+            volume = get_volume(collider)
+
+            ob.rigid_body.mass = volume * context.scene.stra_props_collider.density
+
+
+        return {'FINISHED'}
+
+
 class STRA_OT_Detect_Collisions(Operator):
     bl_idname = "stra.collider_detect"
     bl_label = "Detect collider overlap"

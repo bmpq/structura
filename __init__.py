@@ -28,6 +28,7 @@ classes = [
     ops_collider.STRA_OT_Generate_Colliders,
     ops_collider.STRA_OT_Select_Collection,
     ops_collider.STRA_OT_Detect_Collisions,
+    ops_collider.STRA_OT_Calculate_Mass,
     ops_wireframe.STRA_OT_Generate_Wireframe,
 
     ui.STRA_PT_Wireframe,

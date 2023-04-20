@@ -112,3 +112,8 @@ class STRA_PGT_Collider(PropertyGroup):
         name='Progress',
         default=0
     )
+    density: bpy.props.FloatProperty(
+        name='Density',
+        default=2600,
+        step=100
+    )
