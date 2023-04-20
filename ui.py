@@ -158,6 +158,11 @@ class STRA_PT_Collider(Panel):
                         break
 
         layout.operator("stra.collection_select_objects", icon='RESTRICT_SELECT_OFF')
+
+        col_colliders = utils.get_collection_colliders()
+        if len(col_colliders.objects) > 1:
+            layout.operator("stra.collider_detect", icon='SELECT_DIFFERENCE')
+
         r = layout.row()
         r.label(text=f'{mesh_amount} selected object(s)')
 

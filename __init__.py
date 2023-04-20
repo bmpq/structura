@@ -11,7 +11,6 @@ import bpy
 
 from . import (
     properties,
-    viewport,
     ops_structure,
     ops_collider,
     ops_wireframe,
@@ -24,12 +23,11 @@ classes = [
     properties.STRA_PGT_Collider,
     properties.STRA_PGT_Wireframe,
 
-    viewport.STRA_OT_Viewport_collider_detect,
-
     ops_structure.STRA_OT_Generate_Structure,
     ops_structure.STRA_OT_Modify_Structure,
     ops_collider.STRA_OT_Generate_Colliders,
     ops_collider.STRA_OT_Select_Collection,
+    ops_collider.STRA_OT_Detect_Collisions,
     ops_wireframe.STRA_OT_Generate_Wireframe,
 
     ui.STRA_PT_Wireframe,

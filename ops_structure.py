@@ -5,7 +5,7 @@ from bpy.types import Operator
 import bmesh
 import math
 from mathutils.bvhtree import BVHTree
-from . import utils, viewport
+from . import utils
 
 
 def modify_const(ob, props):
