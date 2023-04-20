@@ -93,6 +93,8 @@ class STRA_PT_Joint(Panel):
             r.prop(props_joint, "leeway_linear")
             r.prop(props_joint, "leeway_angular")
         layout.prop(props_joint, "use_local_collisions")
+
+        layout.prop(props_joint, "use_mass_threshold")
         layout.prop(props_joint, "break_threshold")
 
         joint_amount = 0

@@ -14,6 +14,12 @@ def modify_const(ob, props):
     ob.rigid_body_constraint.use_breaking = True
     ob.rigid_body_constraint.breaking_threshold = props.break_threshold
 
+    mass_min = ob.rigid_body_constraint.object1.rigid_body.mass
+    if ob.rigid_body_constraint.object2.rigid_body.mass < mass_min:
+        mass_min = ob.rigid_body_constraint.object2.rigid_body.mass
+    if props.use_mass_threshold:
+        ob.rigid_body_constraint.breaking_threshold *= mass_min
+
     ang_max = math.radians(props.leeway_angular)
     lin_max = props.leeway_linear
 
