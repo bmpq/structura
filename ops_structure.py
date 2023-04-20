@@ -122,7 +122,7 @@ class STRA_OT_Modify_Structure(Operator):
         bpy.context.scene.frame_current = 0
         bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
 
-        col_joints = utils.get_collection_joints(context)
+        col_joints = utils.get_collection_joints()
 
         for ob in context.selected_objects:
             if ob.rigid_body is None:
@@ -161,7 +161,7 @@ class STRA_OT_Generate_Structure(Operator):
         props = context.scene.stra_props_structure
         props_const = context.scene.stra_props_joint
 
-        col_joints = utils.get_collection_joints(context)
+        col_joints = utils.get_collection_joints()
 
         bpy.context.scene.frame_current = 0
         bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)

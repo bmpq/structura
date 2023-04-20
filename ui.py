@@ -67,7 +67,7 @@ class STRA_PT_Joint(Panel):
         props_joint = context.scene.stra_props_joint
 
 
-        col_joints = utils.get_collection_joints(context)
+        col_joints = utils.get_collection_joints()
         generated = len(col_joints.objects) > 0
 
         mesh_amount = 0
@@ -159,28 +159,15 @@ class STRA_PT_Collider(Panel):
 
         layout.operator("stra.collection_select_objects", icon='RESTRICT_SELECT_OFF')
         r = layout.row()
-        r.label(text=f'Collider shapes in')
-        r = layout.row()
-        r.scale_y = 0.5
-        r.label(text=f'{mesh_amount} selected object(s):')
+        r.label(text=f'{mesh_amount} selected object(s)')
 
         if mesh_amount == 0:
             return
 
-        b = layout.box()
-        b.active = False
-        for sh in sh_amount:
-            if sh_amount[sh] == 0:
-                continue
-            utils.draw_list_entry(b, sh.name, sh_amount[sh])
-        if mesh_amount > rb_amount:
-            utils.draw_list_entry(b, '[No rigid body]', str(mesh_amount - rb_amount))
-
-        layout.separator(factor=1)
-
         layout.prop(props_collider, property="shape", text="Collider shape")
-        if props_collider.shape == 'COMPOUND':
-            layout.prop(props_collider, "scale")
+        layout.prop(props_collider, "scale_global")
+        layout.prop(props_collider, "scale_custom")
+        if props_collider.shape == 'VOXEL':
             layout.prop(props_collider, "voxel_size")
 
         r = layout.row()
@@ -188,7 +175,5 @@ class STRA_PT_Collider(Panel):
         if props_collider.progress > 0.0 and props_collider.progress < 1.0:
             r.label(text=f"Progress: {props_collider.progress*100:.2f}%")
         else:
-            txt = f'Generate colliders for {mesh_amount} object(s)' if props_collider.shape == 'COMPOUND' else f'Set to {props_collider.shape} for {mesh_amount} object(s)'
-            if rb_amount < mesh_amount:
-                txt = f'Add rigid body to {mesh_amount - rb_amount} object(s)'
+            txt = f'Generate colliders for {mesh_amount} object(s)'
             r.operator("stra.collider_generate", icon='MESH_ICOSPHERE', text=txt)

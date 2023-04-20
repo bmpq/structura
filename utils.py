@@ -1,4 +1,3 @@
-from gc import collect
 import bpy
 
 
@@ -10,10 +9,16 @@ def get_collection(parent_col, name):
     return col
 
 
-def get_collection_joints(context):
-    col = get_collection(context.scene.collection, 'STRUCTURA')
-    col_joints = get_collection(col, 'STRUCTURA_JOINTS')
-    return col_joints
+def get_collection_joints():
+    col_parent = get_collection(bpy.context.scene.collection, 'STRUCTURA')
+    col = get_collection(col_parent, 'STRUCTURA_JOINTS')
+    return col
+
+
+def get_collection_colliders():
+    col_parent = get_collection(bpy.context.scene.collection, 'STRUCTURA')
+    col = get_collection(col_parent, 'STRUCTURA_COLLIDERS')
+    return col
 
 
 def draw_list_entry(b, left, right):
