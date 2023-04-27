@@ -140,22 +140,36 @@ class STRA_OT_Modify_Structure(Operator):
         return {'FINISHED'}
 
 
-def top_k_closest_pairs(list1, list2, k):
-    pairs = []
-    for p1 in list1:
-        for p2 in list2:
-            dist = (p1 - p2).length
-            pairs.append((dist, (p1, p2)))
+def get_closest_pair(list1, list2):
+    # ((x, y, z), (x, y, z))
+    pair = (None, None)
+    min_dist = float("inf")
 
-    pairs.sort()
+    # Sort both lists by x coordinate
+    list1.sort(key=lambda co: co.x)
+    list2.sort(key=lambda co: co.x)
 
-    top = [pair[1] for pair in pairs[:k]]
-    result = []
-    for p in top:
-        result.append(p[0])
-        result.append(p[1])
+    # Use two pointers to scan both lists
+    i = 0 # pointer for list1
+    j = 0 # pointer for list2
 
-    return result
+    while i < len(list1) and j < len(list2):
+        co1 = list1[i]
+        co2 = list2[j]
+        dist = (co1 - co2).length
+
+        # Update the pair and min_dist if needed
+        if dist < min_dist:
+            min_dist = dist
+            pair = (co1, co2)
+
+        # Move the pointer with smaller x coordinate
+        if co1.x < co2.x:
+            i += 1
+        else:
+            j += 1
+
+    return pair
 
 
 class STRA_OT_Generate_Structure(Operator):
@@ -200,7 +214,7 @@ class STRA_OT_Generate_Structure(Operator):
                         coords_list1.append(face1.calc_center_median_weighted())
                         coords_list2.append(face2.calc_center_median_weighted())
 
-                    closest_pair = top_k_closest_pairs(coords_list1, coords_list2, 1)
+                    closest_pair = get_closest_pair(coords_list1, coords_list2)
 
                     loc = (closest_pair[0] + closest_pair[1]) / 2
 
