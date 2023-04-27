@@ -8,39 +8,40 @@ from . import utils
 
 
 def modify_const(ob, props):
-    ob.rigid_body_constraint.type = props.type
-    ob.rigid_body_constraint.disable_collisions = not props.use_local_collisions
-    ob.rigid_body_constraint.use_breaking = True
-    ob.rigid_body_constraint.breaking_threshold = props.break_threshold
+    rbc = ob.rigid_body_constraint
+    rbc.type = props.type
+    rbc.disable_collisions = not props.use_local_collisions
+    rbc.use_breaking = True
+    rbc.breaking_threshold = props.break_threshold
 
-    if props.use_mass_threshold and ob.rigid_body_constraint.object1 is not None and ob.rigid_body_constraint.object2 is not None:
-        mass_min = ob.rigid_body_constraint.object1.rigid_body.mass
-        if ob.rigid_body_constraint.object2.rigid_body.mass < mass_min:
-            mass_min = ob.rigid_body_constraint.object2.rigid_body.mass
-        ob.rigid_body_constraint.breaking_threshold *= mass_min
+    if props.use_mass_threshold and rbc.object1 is not None and rbc.object2 is not None:
+        mass_min = rbc.object1.rigid_body.mass
+        if rbc.object2.rigid_body.mass < mass_min:
+            mass_min = rbc.object2.rigid_body.mass
+        rbc.breaking_threshold *= mass_min
 
     ang_max = math.radians(props.leeway_angular)
     lin_max = props.leeway_linear
 
-    ob.rigid_body_constraint.use_limit_ang_x = True
-    ob.rigid_body_constraint.limit_ang_x_lower = 0
-    ob.rigid_body_constraint.limit_ang_x_upper = ang_max
-    ob.rigid_body_constraint.use_limit_ang_y = True
-    ob.rigid_body_constraint.limit_ang_y_lower = 0
-    ob.rigid_body_constraint.limit_ang_y_upper = ang_max
-    ob.rigid_body_constraint.use_limit_ang_z = True
-    ob.rigid_body_constraint.limit_ang_z_lower = 0
-    ob.rigid_body_constraint.limit_ang_z_upper = ang_max
+    rbc.use_limit_ang_x = True
+    rbc.limit_ang_x_lower = 0
+    rbc.limit_ang_x_upper = ang_max
+    rbc.use_limit_ang_y = True
+    rbc.limit_ang_y_lower = 0
+    rbc.limit_ang_y_upper = ang_max
+    rbc.use_limit_ang_z = True
+    rbc.limit_ang_z_lower = 0
+    rbc.limit_ang_z_upper = ang_max
 
-    ob.rigid_body_constraint.use_limit_lin_x = True
-    ob.rigid_body_constraint.limit_lin_x_lower = 0
-    ob.rigid_body_constraint.limit_lin_x_upper = lin_max
-    ob.rigid_body_constraint.use_limit_lin_y = True
-    ob.rigid_body_constraint.limit_lin_y_lower = 0
-    ob.rigid_body_constraint.limit_lin_y_upper = lin_max
-    ob.rigid_body_constraint.use_limit_lin_z = True
-    ob.rigid_body_constraint.limit_lin_z_lower = 0
-    ob.rigid_body_constraint.limit_lin_z_upper = lin_max
+    rbc.use_limit_lin_x = True
+    rbc.limit_lin_x_lower = 0
+    rbc.limit_lin_x_upper = lin_max
+    rbc.use_limit_lin_y = True
+    rbc.limit_lin_y_lower = 0
+    rbc.limit_lin_y_upper = lin_max
+    rbc.use_limit_lin_z = True
+    rbc.limit_lin_z_lower = 0
+    rbc.limit_lin_z_upper = lin_max
 
 
 def get_bvh(objects, use_overlap_margin, overlap_margin, subd):
