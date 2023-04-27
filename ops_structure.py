@@ -1,4 +1,3 @@
-from ctypes import util
 import bpy
 from bpy.types import Operator
 
@@ -14,10 +13,10 @@ def modify_const(ob, props):
     ob.rigid_body_constraint.use_breaking = True
     ob.rigid_body_constraint.breaking_threshold = props.break_threshold
 
-    mass_min = ob.rigid_body_constraint.object1.rigid_body.mass
-    if ob.rigid_body_constraint.object2.rigid_body.mass < mass_min:
-        mass_min = ob.rigid_body_constraint.object2.rigid_body.mass
-    if props.use_mass_threshold:
+    if props.use_mass_threshold and ob.rigid_body_constraint.object1 is not None and ob.rigid_body_constraint.object2 is not None:
+        mass_min = ob.rigid_body_constraint.object1.rigid_body.mass
+        if ob.rigid_body_constraint.object2.rigid_body.mass < mass_min:
+            mass_min = ob.rigid_body_constraint.object2.rigid_body.mass
         ob.rigid_body_constraint.breaking_threshold *= mass_min
 
     ang_max = math.radians(props.leeway_angular)
@@ -178,6 +177,9 @@ class STRA_OT_Generate_Structure(Operator):
     bl_options = {"UNDO_GROUPED"}
 
     def execute(self, context):
+        if context.scene.rigidbody_world is None:
+            bpy.ops.rigidbody.world_add()
+
         props = context.scene.stra_props_structure
         props_const = context.scene.stra_props_joint
 

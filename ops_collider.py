@@ -56,6 +56,9 @@ class STRA_OT_Generate_Colliders(Operator):
     bl_options = {"UNDO_GROUPED"}
 
     def execute(self, context):
+        if context.scene.rigidbody_world is None:
+            bpy.ops.rigidbody.world_add()
+
         context.scene.frame_current = 0
 
         props = context.scene.stra_props_collider
