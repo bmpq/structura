@@ -71,6 +71,12 @@ class STRA_PT_Joint(Panel):
             layout.prop(props_structure, "overlap_margin")
         layout.prop(props_structure, "subd", text='Overlap detection accuracy')
 
+        r = layout.row()
+        c1 = r.column()
+        c2 = r.column()
+        c1.label(text='Connect by')
+        c2.prop(props_structure, "select_mode", text="")
+
         if mesh_amount > 1:
             r = layout.row()
             r.scale_y = 2

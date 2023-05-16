@@ -4,6 +4,13 @@ from . import utils
 
 
 class STRA_PGT_Structure(PropertyGroup):
+    select_mode_types = []
+    select_mode_types.append(('VERTEX', 'Vertices', 'Connect by vertices'))
+    select_mode_types.append(('FACE', 'Faces', 'Connect by faces'))
+
+    select_mode: bpy.props.EnumProperty(
+        items=select_mode_types
+    )
     use_overlap_margin: bpy.props.BoolProperty(
         name="Overlap margin",
         default=True

@@ -199,13 +199,18 @@ class STRA_OT_Generate_Structure(Operator):
                     for p1, p2 in overlap_pairs:
                         face1 = bm1.faces[p1]
                         face2 = bm2.faces[p2]
-                        for v1 in face1.verts:
-                            coords_list1.append(v1.co)
-                        for v2 in face2.verts:
-                            coords_list2.append(v2.co)
 
-                        coords_list1.append(face1.calc_center_median_weighted())
-                        coords_list2.append(face2.calc_center_median_weighted())
+                        if props.select_mode == 'VERTEX':
+                            print('vertex')
+                            for v1 in face1.verts:
+                                coords_list1.append(v1.co)
+                            for v2 in face2.verts:
+                                coords_list2.append(v2.co)
+
+                        if props.select_mode == 'FACE':
+                            print('face')
+                            coords_list1.append(face1.calc_center_median_weighted())
+                            coords_list2.append(face2.calc_center_median_weighted())
 
                     closest_pair = get_closest_pair(coords_list1, coords_list2)
 
