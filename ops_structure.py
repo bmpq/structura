@@ -4,6 +4,7 @@ from bpy.types import Operator
 import bmesh
 import math
 from mathutils.bvhtree import BVHTree
+from mathutils.kdtree import KDTree
 from . import utils
 
 
@@ -141,33 +142,22 @@ class STRA_OT_Modify_Structure(Operator):
 
 
 def get_closest_pair(list1, list2):
-    # ((x, y, z), (x, y, z))
-    pair = (None, None)
-    min_dist = float("inf")
+    if not list1 or not list2:
+        return None
 
-    # Sort both lists by x coordinate
-    list1.sort(key=lambda co: co.x)
-    list2.sort(key=lambda co: co.x)
+    kd = KDTree(len(list2))
+    for i, p2 in enumerate(list2):
+        kd.insert(p2, i)
+    kd.balance()
 
-    # Use two pointers to scan both lists
-    i = 0 # pointer for list1
-    j = 0 # pointer for list2
+    min_dist = math.inf
+    pair = None
 
-    while i < len(list1) and j < len(list2):
-        co1 = list1[i]
-        co2 = list2[j]
-        dist = (co1 - co2).length
-
-        # Update the pair and min_dist if needed
+    for p1 in list1:
+        co, index, dist = kd.find(p1)
         if dist < min_dist:
             min_dist = dist
-            pair = (co1, co2)
-
-        # Move the pointer with smaller x coordinate
-        if co1.x < co2.x:
-            i += 1
-        else:
-            j += 1
+            pair = (p1, co)
 
     return pair
 
