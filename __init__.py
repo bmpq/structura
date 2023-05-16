@@ -14,6 +14,7 @@ from . import (
     ops_structure,
     ops_collider,
     ui,
+    utils
 )
 
 classes = [

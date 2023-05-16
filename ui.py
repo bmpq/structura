@@ -17,9 +17,8 @@ class STRA_PT_Joint(Panel):
         props_structure = context.scene.stra_props_structure
         props_joint = context.scene.stra_props_joint
 
-
-        col_joints = utils.get_collection_joints()
-        generated = len(col_joints.objects) > 0
+        col_joints = utils.get_collection_joints(False)
+        generated = col_joints is not None and len(col_joints.objects) > 0
 
         mesh_amount = 0
         for ob in context.selected_objects:
@@ -32,6 +31,7 @@ class STRA_PT_Joint(Panel):
         layout.label(text=f'{mesh_amount} mesh object(s) selected')
 
         if mesh_amount < 2:
+            layout.label(text=f'(Select at least 2 mesh objects)')
             return
 
         r = layout.row()
@@ -82,11 +82,12 @@ class STRA_PT_Joint(Panel):
 
 class STRA_PT_Collider(Panel):
     bl_idname = "STRA_PT_Collider"
-    bl_label = "Colliders"
+    bl_label = "Custom colliders"
     bl_category = "Structura"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_context = "objectmode"
+    bl_options = {'DEFAULT_CLOSED'}
 
     def draw(self, context):
         layout = self.layout
@@ -110,10 +111,8 @@ class STRA_PT_Collider(Panel):
                         sh_amount[sh] += 1
                         break
 
-        layout.operator("stra.collection_select_objects", icon='RESTRICT_SELECT_OFF')
-
-        col_colliders = utils.get_collection_colliders()
-        if len(col_colliders.objects) > 1:
+        col_colliders = utils.get_collection_colliders(False)
+        if col_colliders is not None and len(col_colliders.objects) > 1:
             layout.operator("stra.collider_detect", icon='SELECT_DIFFERENCE')
 
         r = layout.row()

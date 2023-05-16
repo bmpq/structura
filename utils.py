@@ -4,23 +4,46 @@ OBJNAME_COLLIDER = 'STRA_COLLIDER'
 OBJNAME_JOINT = 'STRA_JOINT'
 
 
-def get_collection(parent_col, name):
+def get_collection(parent_col, name, create=True):
     col = parent_col.children.get(name)
-    if col is None:
+
+    if col is None and create:
         col = bpy.data.collections.new(name)
         parent_col.children.link(col)
+
+        col.color_tag = 'COLOR_04'
+
     return col
 
 
-def get_collection_joints():
-    col_parent = get_collection(bpy.context.scene.collection, 'STRUCTURA')
-    col = get_collection(col_parent, 'STRUCTURA_JOINTS')
+def get_collection_joints(create=True):
+    col_parent = get_collection(bpy.context.scene.collection, 'STRUCTURA', create=create)
+    if col_parent is None:
+        return None
+    col = get_collection(col_parent, 'STRUCTURA_JOINTS', create=create)
+    if col is None:
+        return None
+
     return col
 
 
-def get_collection_colliders():
-    col_parent = get_collection(bpy.context.scene.collection, 'STRUCTURA')
-    col = get_collection(col_parent, 'STRUCTURA_COLLIDERS')
+def get_collection_colliders(create=True):
+    col_parent = get_collection(bpy.context.scene.collection, 'STRUCTURA', create=create)
+    if col_parent is None:
+        return None
+    col = get_collection(col_parent, 'STRUCTURA_COLLIDERS', create=create)
+    if col is None:
+        return None
+
+    for ob in col.objects:
+        if ob.parent is None:
+            for cl in ob.users_collection:
+                cl.objects.unlink(ob)
+
+    if create:
+        col.hide_select = True
+        col.hide_render = True
+
     return col
 
 

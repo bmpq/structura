@@ -154,6 +154,7 @@ class STRA_OT_Generate_Colliders(Operator):
                 new_ob.rigid_body.collision_shape = 'CONVEX_HULL'
 
             new_ob.show_in_front = True
+            new_ob.display_type = 'WIRE'
 
             index += 1
             props.progress = index / len(mesh_data)
@@ -213,16 +214,18 @@ class STRA_OT_Calculate_Mass(Operator):
 
 class STRA_OT_Detect_Collisions(Operator):
     bl_idname = "stra.collider_detect"
-    bl_label = "Detect collider overlap"
+    bl_label = "Detect custom collider overlap"
 
     def execute(self, context):
         trees = []
         for ob in bpy.data.objects:
+            ob.select_set(False)
+
             if ob.rigid_body is None:
                 continue
             if ob.rigid_body.type == 'PASSIVE':
                 continue
-            if 'collider' in ob.name or ob.rigid_body.collision_shape == 'CONVEX_HULL':
+            if utils.OBJNAME_COLLIDER in ob.name:
                 bm = bmesh.new()
                 bm.from_mesh(ob.data)
                 if len(bm.verts) == 0:
@@ -243,7 +246,7 @@ class STRA_OT_Detect_Collisions(Operator):
 
                 trees.append((ob, tree, tree_convex))
 
-        not_found = True
+        overlap_num = 0
         for i in range(len(trees)):
             for j in range(i + 1, len(trees)):
                 ob1, tree1, tree1_convex = trees[i]
@@ -253,11 +256,12 @@ class STRA_OT_Detect_Collisions(Operator):
                     tree1.overlap(tree2_convex)
                 if overlap_pairs:
                     not_found = False
-                    print(f'--------WARNING: {ob1.name} collides with {ob2.name}')
+                    print(f'OVERLAP: {ob1.name} collides with {ob2.name}')
 
                     ob1.parent.select_set(True)
                     ob2.parent.select_set(True)
 
-        if not_found:
-            print('No collider overlaps found')
+                    overlap_num += 1
+
+        self.report({'INFO'}, f'Found {overlap_num} overlaps')
         return {'FINISHED'}
