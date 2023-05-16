@@ -2,24 +2,6 @@ import bpy
 from bpy.types import PropertyGroup
 from . import utils
 
-class STRA_PGT_Wireframe(PropertyGroup):
-    thickness: bpy.props.FloatProperty(
-        name="Thickness",
-        min=0,
-        soft_min=0.001,
-        soft_max=1,
-        default=0.1,
-        precision=3,
-        step=1
-    )
-    prune: bpy.props.FloatProperty(
-        name="Prune",
-        soft_min=0,
-        default=0.1,
-        precision=3,
-        step=1
-    )
-
 
 class STRA_PGT_Structure(PropertyGroup):
     use_overlap_margin: bpy.props.BoolProperty(
