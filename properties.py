@@ -5,12 +5,13 @@ from . import utils
 
 class STRA_PGT_Structure(PropertyGroup):
     select_mode_types = []
+    select_mode_types.append(('AND', 'Vertices and faces', 'Connect by faces and vertices'))
     select_mode_types.append(('VERTEX', 'Vertices', 'Connect by vertices'))
     select_mode_types.append(('FACE', 'Faces', 'Connect by faces'))
-    select_mode_types.append(('AND', 'Vertices and faces', 'Connect by faces and vertices'))
 
     select_mode: bpy.props.EnumProperty(
-        items=select_mode_types
+        items=select_mode_types,
+        default='AND'
     )
     use_overlap_margin: bpy.props.BoolProperty(
         name="Overlap margin",
@@ -85,13 +86,13 @@ class STRA_PGT_Collider(PropertyGroup):
         items=rb_shapes
     )
     scale_global: bpy.props.FloatVectorProperty(
-        name='Scale (global axis)', subtype='XYZ',
+        name='Scale (object local axis)', subtype='XYZ',
         default=(1.0, 1.0, 1.0),
         precision=4,
         step=1
     )
     scale_custom: bpy.props.FloatVectorProperty(
-        name='Scale (custom local axis)', subtype='XYZ',
+        name='Scale (mesh calculated axis)', subtype='XYZ',
         description='The custom axis is derived from the vertices that are the furthest apart from each other',
         default=(1.0, 1.0, 1.0),
         precision=4,

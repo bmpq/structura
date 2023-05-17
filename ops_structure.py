@@ -110,12 +110,16 @@ def create_joint(col_joints, obj1, obj2, loc):
 
 
 def remove_existing_joints(col_joints, obj1, obj2):
+    num_existing_joints = 0
     existing_joints = get_joints_by_rb(obj1, col_joints)
     for ex_joint in existing_joints:
         rbc = ex_joint.rigid_body_constraint
         if rbc.object1 == obj2 or rbc.object2 == obj2:
             for col in ex_joint.users_collection:
                 col.objects.unlink(ex_joint)
+            num_existing_joints += 1
+
+    return num_existing_joints
 
 
 class STRA_OT_Modify_Structure(Operator):
@@ -181,11 +185,13 @@ class STRA_OT_Generate_Structure(Operator):
 
         trees = get_bvh(context.selected_objects, props.use_overlap_margin, props.overlap_margin, props.subd)
 
+        num_existing_joints = 0
+
         for obj1 in context.selected_objects:
             for obj2 in context.selected_objects:
                 if obj1 == obj2:
                     continue
-                remove_existing_joints(col_joints, obj1, obj2)
+                num_existing_joints += remove_existing_joints(col_joints, obj1, obj2)
 
         joints_generated_amount = 0
         for i in range(len(trees)):
@@ -227,6 +233,8 @@ class STRA_OT_Generate_Structure(Operator):
             bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
             print(f"Progress: {props.progress*100:.2f}%")
 
-        print(f'RESULT: Generated {joints_generated_amount} joints')
+        result = f"{joints_generated_amount} joint(s) generated"
+        result += f", ({joints_generated_amount - num_existing_joints} new)"
+        self.report({'INFO'}, result)
 
         return {'FINISHED'}
