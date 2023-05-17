@@ -7,6 +7,7 @@ class STRA_PGT_Structure(PropertyGroup):
     select_mode_types = []
     select_mode_types.append(('VERTEX', 'Vertices', 'Connect by vertices'))
     select_mode_types.append(('FACE', 'Faces', 'Connect by faces'))
+    select_mode_types.append(('AND', 'Vertices and faces', 'Connect by faces and vertices'))
 
     select_mode: bpy.props.EnumProperty(
         items=select_mode_types

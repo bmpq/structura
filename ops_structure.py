@@ -200,14 +200,14 @@ class STRA_OT_Generate_Structure(Operator):
                         face1 = bm1.faces[p1]
                         face2 = bm2.faces[p2]
 
-                        if props.select_mode == 'VERTEX':
+                        if props.select_mode == 'VERTEX' or props.select_mode == 'AND':
                             print('vertex')
                             for v1 in face1.verts:
                                 coords_list1.append(v1.co)
                             for v2 in face2.verts:
                                 coords_list2.append(v2.co)
 
-                        if props.select_mode == 'FACE':
+                        if props.select_mode == 'FACE' or props.select_mode == 'AND':
                             print('face')
                             coords_list1.append(face1.calc_center_median_weighted())
                             coords_list2.append(face2.calc_center_median_weighted())
