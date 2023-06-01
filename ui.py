@@ -70,6 +70,8 @@ class STRA_PT_Joint(Panel):
         if props_structure.use_overlap_margin:
             layout.prop(props_structure, "overlap_margin")
 
+        layout.prop(props_structure, "min_overlap_threshold")
+
         if mesh_amount > 1:
             r = layout.row()
             r.scale_y = 2

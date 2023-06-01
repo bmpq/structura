@@ -202,6 +202,15 @@ class STRA_OT_Generate_Structure(Operator):
                     if len(intersect_obj.data.vertices) == 0:
                         continue
 
+                    bm = bmesh.new()
+                    bm.from_mesh(intersect_obj.data)
+                    volume = bm.calc_volume()
+                    bm.free()
+
+                    if volume < props.min_overlap_threshold:
+                        bpy.data.objects.remove(intersect_obj)
+                        continue
+
                     loc = Vector((0, 0, 0))
                     for v in intersect_obj.data.vertices:
                         loc += v.co

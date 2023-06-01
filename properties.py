@@ -16,6 +16,14 @@ class STRA_PGT_Structure(PropertyGroup):
         precision=3,
         step=1
     )
+    min_overlap_threshold: bpy.props.FloatProperty(
+        name="Min overlap volume",
+        min=0,
+        soft_max=10,
+        default=0.1,
+        precision=3,
+        step=1
+    )
     progress: bpy.props.FloatProperty(
         name="Progress",
         min=0.0,
