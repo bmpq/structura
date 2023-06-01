@@ -4,7 +4,7 @@ from bpy.types import Operator
 import bmesh
 import math
 from mathutils.bvhtree import BVHTree
-from mathutils.kdtree import KDTree
+from mathutils import Vector
 from . import utils
 
 
@@ -45,7 +45,7 @@ def modify_const(ob, props):
     rbc.limit_lin_z_upper = lin_max
 
 
-def get_bvh(objects, use_overlap_margin, overlap_margin, subd):
+def get_bvh(objects, use_overlap_margin, overlap_margin):
     trees = []
     for obj in objects:
         if obj.type != 'MESH':
@@ -63,9 +63,6 @@ def get_bvh(objects, use_overlap_margin, overlap_margin, subd):
 
         if use_overlap_margin:
             bmesh.ops.solidify(bm, geom=bm.faces, thickness=-overlap_margin)
-
-        if subd > 0:
-            bmesh.ops.subdivide_edges(bm, edges=bm.edges, cuts=subd)
 
         bm.verts.ensure_lookup_table()
         bm.edges.ensure_lookup_table()
@@ -145,25 +142,23 @@ class STRA_OT_Modify_Structure(Operator):
         return {'FINISHED'}
 
 
-def get_closest_pair(list1, list2):
-    if not list1 or not list2:
-        return None
+def create_intersection_mesh(obj1, obj2, solidify_thickness):
+    temp_obj = bpy.data.objects.new("temp", obj1.data.copy())
+    bpy.context.collection.objects.link(temp_obj)
+    temp_obj.matrix_world = obj1.matrix_world
 
-    kd = KDTree(len(list2))
-    for i, p2 in enumerate(list2):
-        kd.insert(p2, i)
-    kd.balance()
+    bpy.context.view_layer.objects.active = temp_obj
 
-    min_dist = math.inf
-    pair = None
+    solidify_mod = temp_obj.modifiers.new(type="SOLIDIFY", name="solidify")
+    solidify_mod.thickness = -solidify_thickness
+    bpy.ops.object.modifier_apply(modifier=solidify_mod.name)
 
-    for p1 in list1:
-        co, index, dist = kd.find(p1)
-        if dist < min_dist:
-            min_dist = dist
-            pair = (p1, co)
+    bool_mod = temp_obj.modifiers.new(type="BOOLEAN", name="bool")
+    bool_mod.operation = 'INTERSECT'
+    bool_mod.object = obj2
+    bpy.ops.object.modifier_apply(modifier=bool_mod.name)
 
-    return pair
+    return temp_obj
 
 
 class STRA_OT_Generate_Structure(Operator):
@@ -183,7 +178,7 @@ class STRA_OT_Generate_Structure(Operator):
         bpy.context.scene.frame_current = 0
         bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
 
-        trees = get_bvh(context.selected_objects, props.use_overlap_margin, props.overlap_margin, props.subd)
+        trees = get_bvh(context.selected_objects, props.use_overlap_margin, props.overlap_margin)
 
         num_existing_joints = 0
 
@@ -199,28 +194,22 @@ class STRA_OT_Generate_Structure(Operator):
                 tree1, (obj1, bm1) = trees[i]
                 tree2, (obj2, bm2) = trees[j]
                 overlap_pairs = tree1.overlap(tree2)
+
                 if overlap_pairs:
-                    coords_list1 = []
-                    coords_list2 = []
-                    for p1, p2 in overlap_pairs:
-                        face1 = bm1.faces[p1]
-                        face2 = bm2.faces[p2]
+                    intersect_obj = create_intersection_mesh(
+                        obj1, obj2, props.overlap_margin)
 
-                        if props.select_mode == 'VERTEX' or props.select_mode == 'AND':
-                            print('vertex')
-                            for v1 in face1.verts:
-                                coords_list1.append(v1.co)
-                            for v2 in face2.verts:
-                                coords_list2.append(v2.co)
+                    if len(intersect_obj.data.vertices) == 0:
+                        continue
 
-                        if props.select_mode == 'FACE' or props.select_mode == 'AND':
-                            print('face')
-                            coords_list1.append(face1.calc_center_median_weighted())
-                            coords_list2.append(face2.calc_center_median_weighted())
+                    loc = Vector((0, 0, 0))
+                    for v in intersect_obj.data.vertices:
+                        loc += v.co
+                    loc /= len(intersect_obj.data.vertices)
 
-                    closest_pair = get_closest_pair(coords_list1, coords_list2)
+                    loc = intersect_obj.matrix_world @ loc
 
-                    loc = (closest_pair[0] + closest_pair[1]) / 2
+                    bpy.data.objects.remove(intersect_obj)
 
                     joint = create_joint(col_joints, obj1, obj2, loc)
                     modify_const(joint, props_const)
