@@ -12,7 +12,7 @@ class STRA_PGT_Structure(PropertyGroup):
         name="Overlap margin",
         soft_min=0,
         soft_max=10,
-        default=0.1,
+        default=0.002,
         precision=3,
         step=1
     )
@@ -20,7 +20,7 @@ class STRA_PGT_Structure(PropertyGroup):
         name="Min overlap volume",
         min=0,
         soft_max=10,
-        default=0.1,
+        default=0,
         precision=3,
         step=1
     )
@@ -48,13 +48,13 @@ class STRA_PGT_Joint(PropertyGroup):
     )
     use_mass_threshold: bpy.props.BoolProperty(
         name="Multiply break threshold by mass",
-        default=False
+        default=True
     )
     break_threshold: bpy.props.FloatProperty(
         name="Break threshold",
         min=0.0,
         max=1000.0,
-        default=40
+        default=5
     )
     leeway_linear: bpy.props.FloatProperty(
         name="Linear range",
