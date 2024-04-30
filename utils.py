@@ -16,6 +16,18 @@ def get_collection(parent_col, name, create=True):
     return col
 
 
+def get_collection_temp(create=True):
+    col_parent = get_collection(bpy.context.scene.collection, 'STRUCTURA', create=create)
+    col = get_collection(col_parent, 'STRUCTURA_TEMP', create=create)
+    return col
+
+
+def clear_temp_collection():
+    col = get_collection_temp()
+    for obj in col.objects:
+        bpy.data.objects.remove(obj)
+
+
 def get_collection_joints(create=True):
     col_parent = get_collection(bpy.context.scene.collection, 'STRUCTURA', create=create)
     if col_parent is None:

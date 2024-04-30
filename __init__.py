@@ -1,7 +1,7 @@
 bl_info = {
     "name": "Structura",
     "author": "bmpq",
-    "version": (0, 3),
+    "version": (0, 3, 1),
     "location": "View3D > Sidebar > Tools",
     "blender": (3, 0, 0),
     "category": "3D View"

@@ -20,8 +20,11 @@ class STRA_PT_Joint(Panel):
         col_joints = utils.get_collection_joints(False)
         generated = col_joints is not None and len(col_joints.objects) > 0
 
+        all_objects_have_rigidbody = True
         mesh_amount = 0
         for ob in context.selected_objects:
+            if ob.rigid_body is None:
+                all_objects_have_rigidbody = False
             if ob.type != 'MESH':
                 continue
             if utils.OBJNAME_COLLIDER in ob.name:
@@ -32,6 +35,10 @@ class STRA_PT_Joint(Panel):
 
         if mesh_amount < 2:
             layout.label(text=f'(Select at least 2 mesh objects)')
+            return
+
+        if not all_objects_have_rigidbody:
+            layout.label(text=f'(Not all selected objects have rigid body)')
             return
 
         r = layout.row()

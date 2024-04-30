@@ -58,6 +58,7 @@ def get_bvh(objects, use_overlap_margin, overlap_margin):
 
         if len(bm.verts) == 0:
             print('todo remove empty mesh objects')
+            continue
 
         bmesh.ops.transform(bm, matrix=obj.matrix_world, verts=bm.verts)
 
@@ -101,7 +102,7 @@ def create_joint(col_joints, obj1, obj2, loc):
     bpy.context.object.rigid_body_constraint.object1 = obj1
     bpy.context.object.rigid_body_constraint.object2 = obj2
 
-    empty.empty_display_size = 0.2
+    empty.empty_display_size = 0.05
 
     return empty
 
@@ -144,7 +145,9 @@ class STRA_OT_Modify_Structure(Operator):
 
 def create_intersection_mesh(obj1, obj2, solidify_thickness):
     temp_obj = bpy.data.objects.new("temp", obj1.data.copy())
-    bpy.context.collection.objects.link(temp_obj)
+
+    col_temp = utils.get_collection_temp()
+    col_temp.objects.link(temp_obj)
     temp_obj.matrix_world = obj1.matrix_world
 
     bpy.context.view_layer.objects.active = temp_obj
