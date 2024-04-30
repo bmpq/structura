@@ -25,23 +25,23 @@ def modify_const(ob, props):
     lin_max = props.leeway_linear
 
     rbc.use_limit_ang_x = True
-    rbc.limit_ang_x_lower = 0
+    rbc.limit_ang_x_lower = -ang_max
     rbc.limit_ang_x_upper = ang_max
     rbc.use_limit_ang_y = True
-    rbc.limit_ang_y_lower = 0
+    rbc.limit_ang_y_lower = -ang_max
     rbc.limit_ang_y_upper = ang_max
     rbc.use_limit_ang_z = True
-    rbc.limit_ang_z_lower = 0
+    rbc.limit_ang_z_lower = -ang_max
     rbc.limit_ang_z_upper = ang_max
 
     rbc.use_limit_lin_x = True
-    rbc.limit_lin_x_lower = 0
+    rbc.limit_lin_x_lower = -lin_max
     rbc.limit_lin_x_upper = lin_max
     rbc.use_limit_lin_y = True
-    rbc.limit_lin_y_lower = 0
+    rbc.limit_lin_y_lower = -lin_max
     rbc.limit_lin_y_upper = lin_max
     rbc.use_limit_lin_z = True
-    rbc.limit_lin_z_lower = 0
+    rbc.limit_lin_z_lower = -lin_max
     rbc.limit_lin_z_upper = lin_max
 
 
