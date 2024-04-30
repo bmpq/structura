@@ -53,7 +53,7 @@ class STRA_PGT_Joint(PropertyGroup):
     break_threshold: bpy.props.FloatProperty(
         name="Break threshold",
         min=0.0,
-        max=1000.0,
+        soft_max=10000.0,
         default=5
     )
     leeway_linear: bpy.props.FloatProperty(
