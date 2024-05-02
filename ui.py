@@ -53,6 +53,7 @@ class STRA_PT_Joint(Panel):
         layout.prop(props_joint, "use_local_collisions")
 
         layout.prop(props_joint, "use_mass_threshold")
+        layout.prop(props_joint, "use_overlap_volume")
         layout.prop(props_joint, "break_threshold")
 
         joint_amount = 0

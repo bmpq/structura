@@ -21,6 +21,9 @@ def modify_const(ob, props):
             mass_min = rbc.object2.rigid_body.mass
         rbc.breaking_threshold *= mass_min
 
+    if props.use_overlap_volume:
+        rbc.breaking_threshold *= ob['intersection_volume']
+
     ang_max = math.radians(props.leeway_angular)
     lin_max = props.leeway_linear
 
@@ -89,7 +92,7 @@ def get_joints_by_rb(obj_rb, col_joints):
     return joint_objs
 
 
-def create_joint(col_joints, obj1, obj2, loc):
+def create_joint(col_joints, obj1, obj2, loc, volume):
     empty_name = utils.OBJNAME_JOINT
     empty = bpy.data.objects.new(empty_name, None)
     col_joints.objects.link(empty)
@@ -103,6 +106,8 @@ def create_joint(col_joints, obj1, obj2, loc):
     bpy.context.object.rigid_body_constraint.object2 = obj2
 
     empty.empty_display_size = 0.05
+
+    empty['intersection_volume'] = volume
 
     return empty
 
@@ -232,6 +237,7 @@ class STRA_OT_Generate_Structure(Operator):
                     bm.free()
 
                     if volume < props.min_overlap_threshold:
+                        print('intersection volume too small, skip joint')
                         bpy.data.objects.remove(intersect_obj)
                         continue
 
@@ -244,12 +250,13 @@ class STRA_OT_Generate_Structure(Operator):
 
                     bpy.data.objects.remove(intersect_obj)
 
-                    joint = create_joint(col_joints, obj1, obj2, loc)
+                    joint = create_joint(col_joints, obj1, obj2, loc, volume)
                     modify_const(joint, props_const)
 
                     joint.show_in_front = True
 
                     joints_generated_amount += 1
+                    print('joint created')
 
             props.progress = (i + 1) / (len(trees))
             bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)

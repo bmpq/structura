@@ -54,6 +54,10 @@ class STRA_PGT_Joint(PropertyGroup):
         name="Multiply break threshold by mass",
         default=True
     )
+    use_overlap_volume: bpy.props.BoolProperty(
+        name="Multiply break threshold by overlap volume",
+        default=True
+    )
     break_threshold: bpy.props.FloatProperty(
         name="Break threshold",
         min=0.0,
