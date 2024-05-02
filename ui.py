@@ -79,12 +79,16 @@ class STRA_PT_Joint(Panel):
 
         layout.prop(props_structure, "min_overlap_threshold")
 
+        if props_structure.progress > 0.0 and props_structure.progress < 1.0:
+            r = layout.row()
+            r.label(text=f"Progress: {props_structure.progress*100:.2f}%")
+
+        layout.prop(props_structure, "overwrite")
+
         if mesh_amount > 1:
             r = layout.row()
             r.scale_y = 2
-            if props_structure.progress > 0.0 and props_structure.progress < 1.0:
-                r.label(text=f"Progress: {props_structure.progress*100:.2f}%")
-            txt_button = f'Regenerate between {mesh_amount} objects' if joint_amount > 0 else f'Generate between {mesh_amount} objects'
+            txt_button = f'Generate between {mesh_amount} objects'
             r.operator("stra.structure_generate", icon='MOD_MESHDEFORM', text=txt_button)
 
 

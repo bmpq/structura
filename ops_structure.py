@@ -120,6 +120,16 @@ def remove_existing_joints(col_joints, obj1, obj2):
     return num_existing_joints
 
 
+def joint_exists(col_joints, obj1, obj2):
+    existing_joints = get_joints_by_rb(obj1, col_joints)
+    for ex_joint in existing_joints:
+        rbc = ex_joint.rigid_body_constraint
+        if rbc.object1 == obj2 or rbc.object2 == obj2:
+            return True
+
+    return False
+
+
 class STRA_OT_Modify_Structure(Operator):
     bl_idname = "stra.structure_modify"
     bl_label = "Modify structure"
@@ -181,24 +191,35 @@ class STRA_OT_Generate_Structure(Operator):
         bpy.context.scene.frame_current = 0
         bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
 
+        print('creating bvh trees...')
         trees = get_bvh(context.selected_objects, props.use_overlap_margin, props.overlap_margin)
 
         num_existing_joints = 0
 
-        for obj1 in context.selected_objects:
-            for obj2 in context.selected_objects:
-                if obj1 == obj2:
-                    continue
-                num_existing_joints += remove_existing_joints(col_joints, obj1, obj2)
+        if props.overwrite:
+            print(f'removing existing joints...')
+            for obj1 in context.selected_objects:
+                for obj2 in context.selected_objects:
+                    if obj1 == obj2:
+                        continue
+                    num_existing_joints += remove_existing_joints(col_joints, obj1, obj2)
+            print(f'done removing {num_existing_joints} joints')
 
         joints_generated_amount = 0
         for i in range(len(trees)):
             for j in range(i + 1, len(trees)):
                 tree1, (obj1, bm1) = trees[i]
                 tree2, (obj2, bm2) = trees[j]
+
+                if not props.overwrite:
+                    if (joint_exists(col_joints, obj1, obj2)):
+                        print(f'joint already exists!')
+                        continue
+
                 overlap_pairs = tree1.overlap(tree2)
 
                 if overlap_pairs:
+                    print(f'creating joint...')
                     intersect_obj = create_intersection_mesh(
                         obj1, obj2, props.overlap_margin)
 
@@ -237,5 +258,8 @@ class STRA_OT_Generate_Structure(Operator):
         result = f"{joints_generated_amount} joint(s) generated"
         result += f", ({joints_generated_amount - num_existing_joints} new)"
         self.report({'INFO'}, result)
+
+        bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
+        utils.clear_temp_collection()
 
         return {'FINISHED'}

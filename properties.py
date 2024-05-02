@@ -24,6 +24,10 @@ class STRA_PGT_Structure(PropertyGroup):
         precision=3,
         step=1
     )
+    overwrite: bpy.props.BoolProperty(
+        name="Overwrite",
+        default=True
+    )
     progress: bpy.props.FloatProperty(
         name="Progress",
         min=0.0,
