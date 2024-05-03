@@ -66,7 +66,7 @@ def get_bvh(objects, use_overlap_margin, overlap_margin):
         bmesh.ops.transform(bm, matrix=obj.matrix_world, verts=bm.verts)
 
         if use_overlap_margin:
-            bmesh.ops.solidify(bm, geom=bm.faces, thickness=-overlap_margin)
+            bmesh.ops.solidify(bm, geom=bm.faces, thickness=-overlap_margin / 4)
 
         bm.verts.ensure_lookup_table()
         bm.edges.ensure_lookup_table()
@@ -74,6 +74,8 @@ def get_bvh(objects, use_overlap_margin, overlap_margin):
 
         tree = BVHTree.FromBMesh(bm)
         trees.append((tree, (obj, bm)))
+
+        bm.free()
 
     return trees
 
@@ -221,42 +223,47 @@ class STRA_OT_Generate_Structure(Operator):
                         print(f'joint already exists!')
                         continue
 
+                print(f'testing overlap between {obj1.name} and {obj2.name}')
                 overlap_pairs = tree1.overlap(tree2)
+                if not overlap_pairs:
+                    print(f'no overlap, continue')
+                    continue
 
-                if overlap_pairs:
-                    print(f'creating joint...')
-                    intersect_obj = create_intersection_mesh(
-                        obj1, obj2, props.overlap_margin)
+                print(f'overlap found...')
+                intersect_obj = create_intersection_mesh(
+                    obj1, obj2, props.overlap_margin)
 
-                    if len(intersect_obj.data.vertices) == 0:
-                        continue
-
-                    bm = bmesh.new()
-                    bm.from_mesh(intersect_obj.data)
-                    volume = bm.calc_volume()
-                    bm.free()
-
-                    if volume < props.min_overlap_threshold:
-                        print('intersection volume too small, skip joint')
-                        bpy.data.objects.remove(intersect_obj)
-                        continue
-
-                    loc = Vector((0, 0, 0))
-                    for v in intersect_obj.data.vertices:
-                        loc += v.co
-                    loc /= len(intersect_obj.data.vertices)
-
-                    loc = intersect_obj.matrix_world @ loc
-
+                if len(intersect_obj.data.vertices) == 0:
+                    print(f'created intersection has no volume, skip joint')
                     bpy.data.objects.remove(intersect_obj)
+                    continue
 
-                    joint = create_joint(col_joints, obj1, obj2, loc, volume)
-                    modify_const(joint, props_const)
+                bm = bmesh.new()
+                bm.from_mesh(intersect_obj.data)
+                volume = bm.calc_volume()
+                bm.free()
 
-                    joint.show_in_front = True
+                if volume < props.min_overlap_threshold:
+                    print('intersection volume too small, skip joint')
+                    bpy.data.objects.remove(intersect_obj)
+                    continue
 
-                    joints_generated_amount += 1
-                    print('joint created')
+                loc = Vector((0, 0, 0))
+                for v in intersect_obj.data.vertices:
+                    loc += v.co
+                loc /= len(intersect_obj.data.vertices)
+
+                loc = intersect_obj.matrix_world @ loc
+
+                bpy.data.objects.remove(intersect_obj)
+
+                joint = create_joint(col_joints, obj1, obj2, loc, volume)
+                modify_const(joint, props_const)
+
+                joint.show_in_front = True
+
+                joints_generated_amount += 1
+                print('joint created')
 
             props.progress = (i + 1) / (len(trees))
             bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)

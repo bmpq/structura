@@ -52,7 +52,7 @@ class STRA_PGT_Joint(PropertyGroup):
     )
     use_mass_threshold: bpy.props.BoolProperty(
         name="Multiply break threshold by mass",
-        default=True
+        default=False
     )
     use_overlap_volume: bpy.props.BoolProperty(
         name="Multiply break threshold by overlap volume",
