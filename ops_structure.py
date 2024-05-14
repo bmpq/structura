@@ -6,7 +6,7 @@ import math
 from mathutils.bvhtree import BVHTree
 from mathutils import Vector
 from . import utils
-
+import time
 
 def modify_const(ob, props):
     rbc = ob.rigid_body_constraint
@@ -161,19 +161,23 @@ class STRA_OT_Modify_Structure(Operator):
 
 
 def create_intersection_mesh(obj1, obj2, solidify_thickness):
-    temp_obj = bpy.data.objects.new("temp", obj1.data.copy())
+    bm = bmesh.new()
+    bm.from_mesh(obj1.data)
+    bmesh.ops.transform(bm, matrix=obj1.matrix_world, verts=bm.verts)
+    bmesh.ops.solidify(bm, geom=bm.faces, thickness=-solidify_thickness)
+
+    solidified_mesh = bpy.data.meshes.new("Solidified_Mesh")
+    bm.to_mesh(solidified_mesh)
+    bm.free()
+    temp_obj = bpy.data.objects.new("Solidified_Object", solidified_mesh)
 
     col_temp = utils.get_collection_temp()
     col_temp.objects.link(temp_obj)
-    temp_obj.matrix_world = obj1.matrix_world
 
     bpy.context.view_layer.objects.active = temp_obj
 
-    solidify_mod = temp_obj.modifiers.new(type="SOLIDIFY", name="solidify")
-    solidify_mod.thickness = -solidify_thickness
-    bpy.ops.object.modifier_apply(modifier=solidify_mod.name)
-
     bool_mod = temp_obj.modifiers.new(type="BOOLEAN", name="bool")
+    bool_mod.solver = 'EXACT' # FAST causes bad volumes
     bool_mod.operation = 'INTERSECT'
     bool_mod.object = obj2
     bpy.ops.object.modifier_apply(modifier=bool_mod.name)
@@ -213,6 +217,9 @@ class STRA_OT_Generate_Structure(Operator):
             print(f'done removing {num_existing_joints} joints')
 
         joints_generated_amount = 0
+
+        start_time = time.time()
+
         for i in range(len(trees)):
             for j in range(i + 1, len(trees)):
                 tree1, (obj1, bm1) = trees[i]
@@ -220,21 +227,20 @@ class STRA_OT_Generate_Structure(Operator):
 
                 if not props.overwrite:
                     if (joint_exists(col_joints, obj1, obj2)):
-                        print(f'joint already exists!')
+                        print(f'(skip) joint already exists!')
                         continue
 
-                print(f'testing overlap between {obj1.name} and {obj2.name}')
                 overlap_pairs = tree1.overlap(tree2)
                 if not overlap_pairs:
-                    print(f'no overlap, continue')
                     continue
 
-                print(f'overlap found...')
+                print(f' ')
+                print(f'overlap found: ({obj1.name} x {obj2.name})')
                 intersect_obj = create_intersection_mesh(
                     obj1, obj2, props.overlap_margin)
 
                 if len(intersect_obj.data.vertices) == 0:
-                    print(f'created intersection has no volume, skip joint')
+                    print(f'(skip) created intersection has no volume')
                     bpy.data.objects.remove(intersect_obj)
                     continue
 
@@ -244,7 +250,7 @@ class STRA_OT_Generate_Structure(Operator):
                 bm.free()
 
                 if volume < props.min_overlap_threshold:
-                    print('intersection volume too small, skip joint')
+                    print('(skip) intersection volume too small')
                     bpy.data.objects.remove(intersect_obj)
                     continue
 
@@ -263,17 +269,19 @@ class STRA_OT_Generate_Structure(Operator):
                 joint.show_in_front = True
 
                 joints_generated_amount += 1
-                print('joint created')
+                print(f'(ok) joint created')
 
             props.progress = (i + 1) / (len(trees))
-            bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
+            print(f"One iteration done")
             print(f"Progress: {props.progress*100:.2f}%")
+            bpy.ops.outliner.orphans_purge(do_local_ids=True)
 
         result = f"{joints_generated_amount} joint(s) generated"
         result += f", ({joints_generated_amount - num_existing_joints} new)"
         self.report({'INFO'}, result)
 
-        bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
-        utils.clear_temp_collection()
+        end_time = time.time()
+        elapsed_time = end_time - start_time
+        print(f'FINISHED! Overlap calculations took {elapsed_time:.2f} seconds')
 
         return {'FINISHED'}
