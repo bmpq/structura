@@ -50,10 +50,6 @@ class STRA_PGT_Joint(PropertyGroup):
         default=True,
         description='Enable collisions between jointed objects'
     )
-    use_mass_threshold: bpy.props.BoolProperty(
-        name="Multiply break threshold by mass",
-        default=False
-    )
     use_overlap_volume: bpy.props.BoolProperty(
         name="Multiply break threshold by overlap volume",
         default=True

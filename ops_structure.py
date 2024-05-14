@@ -15,12 +15,6 @@ def modify_const(ob, props):
     rbc.use_breaking = True
     rbc.breaking_threshold = props.break_threshold
 
-    if props.use_mass_threshold and rbc.object1 is not None and rbc.object2 is not None:
-        mass_min = rbc.object1.rigid_body.mass
-        if rbc.object2.rigid_body.mass < mass_min:
-            mass_min = rbc.object2.rigid_body.mass
-        rbc.breaking_threshold *= mass_min
-
     if props.use_overlap_volume:
         rbc.breaking_threshold *= ob['intersection_volume']
 
