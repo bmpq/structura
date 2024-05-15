@@ -202,7 +202,7 @@ class STRA_OT_Generate_Structure(Operator):
         num_existing_joints = 0
 
         if props.overwrite:
-            print(f'removing existing joints...')
+            print(f'overwrite on, removing existing joints...')
             for obj1 in context.selected_objects:
                 for obj2 in context.selected_objects:
                     if obj1 == obj2:
@@ -219,43 +219,50 @@ class STRA_OT_Generate_Structure(Operator):
                 tree1, (obj1, bm1) = trees[i]
                 tree2, (obj2, bm2) = trees[j]
 
+                overlap_pairs = tree1.overlap(tree2)
+                if not overlap_pairs:
+                    continue
+
                 if not props.overwrite:
                     if (joint_exists(col_joints, obj1, obj2)):
                         print(f'(skip) joint already exists!')
                         continue
 
-                overlap_pairs = tree1.overlap(tree2)
-                if not overlap_pairs:
-                    continue
-
                 print(f' ')
                 print(f'overlap found: ({obj1.name} x {obj2.name})')
-                intersect_obj = create_intersection_mesh(
-                    obj1, obj2, props.overlap_margin)
-
-                if len(intersect_obj.data.vertices) == 0:
-                    print(f'(skip) created intersection has no volume')
-                    bpy.data.objects.remove(intersect_obj)
-                    continue
-
-                bm = bmesh.new()
-                bm.from_mesh(intersect_obj.data)
-                volume = bm.calc_volume()
-                bm.free()
-
-                if volume < props.min_overlap_threshold:
-                    print('(skip) intersection volume too small')
-                    bpy.data.objects.remove(intersect_obj)
-                    continue
 
                 loc = Vector((0, 0, 0))
-                for v in intersect_obj.data.vertices:
-                    loc += v.co
-                loc /= len(intersect_obj.data.vertices)
+                volume = props.overlap_margin
 
-                loc = intersect_obj.matrix_world @ loc
+                if not props.skip_volume:
+                    intersect_obj = create_intersection_mesh(
+                        obj1, obj2, props.overlap_margin)
 
-                bpy.data.objects.remove(intersect_obj)
+                    if len(intersect_obj.data.vertices) == 0:
+                        print(f'(skip) created intersection has no volume')
+                        bpy.data.objects.remove(intersect_obj)
+                        continue
+
+                    bm = bmesh.new()
+                    bm.from_mesh(intersect_obj.data)
+                    volume = bm.calc_volume()
+                    bm.free()
+
+                    if volume < props.min_overlap_threshold:
+                        print('(skip) intersection volume too small')
+                        bpy.data.objects.remove(intersect_obj)
+                        continue
+
+                    for v in intersect_obj.data.vertices:
+                        loc += v.co
+                    loc /= len(intersect_obj.data.vertices)
+
+                    loc = intersect_obj.matrix_world @ loc
+
+                    bpy.data.objects.remove(intersect_obj)
+                else:
+                    # midpoint between two objects
+                    loc = (obj1.location + obj2.location) / 2
 
                 joint = create_joint(col_joints, obj1, obj2, loc, volume)
                 modify_const(joint, props_const)
@@ -263,12 +270,14 @@ class STRA_OT_Generate_Structure(Operator):
                 joint.show_in_front = True
 
                 joints_generated_amount += 1
-                print(f'(ok) joint created')
+                print(f'(ok) joint created with volume {volume:.2f}')
 
             props.progress = (i + 1) / (len(trees))
             print(f"One iteration done")
             print(f"Progress: {props.progress*100:.2f}%")
-            bpy.ops.outliner.orphans_purge(do_local_ids=True)
+
+            if not props.skip_volume:
+                bpy.ops.outliner.orphans_purge(do_local_ids=True)
 
         result = f"{joints_generated_amount} joint(s) generated"
         result += f", ({joints_generated_amount - num_existing_joints} new)"

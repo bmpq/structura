@@ -4,6 +4,11 @@ from . import utils
 
 
 class STRA_PGT_Structure(PropertyGroup):
+    skip_volume: bpy.props.BoolProperty(
+        name="Skip volume calculation",
+        description="Faster but approximates the joint location. Not recommended",
+        default=False
+    )
     use_overlap_margin: bpy.props.BoolProperty(
         name="Overlap margin",
         default=True

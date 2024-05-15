@@ -41,6 +41,7 @@ class STRA_PT_Joint(Panel):
             layout.label(text=f'(Not all selected objects have rigid body)')
             return
 
+        layout.prop(props_structure, "skip_volume")
         r = layout.row()
         c1 = r.column()
         c2 = r.column()
@@ -52,8 +53,8 @@ class STRA_PT_Joint(Panel):
             r.prop(props_joint, "leeway_angular")
         layout.prop(props_joint, "use_local_collisions")
 
-        layout.prop(props_joint, "use_mass_threshold")
-        layout.prop(props_joint, "use_overlap_volume")
+        if not props_structure.skip_volume:
+            layout.prop(props_joint, "use_overlap_volume")
         layout.prop(props_joint, "break_threshold")
 
         joint_amount = 0
@@ -78,7 +79,8 @@ class STRA_PT_Joint(Panel):
         if props_structure.use_overlap_margin:
             layout.prop(props_structure, "overlap_margin")
 
-        layout.prop(props_structure, "min_overlap_threshold")
+        if not props_structure.skip_volume:
+            layout.prop(props_structure, "min_overlap_threshold")
 
         if props_structure.progress > 0.0 and props_structure.progress < 1.0:
             r = layout.row()
