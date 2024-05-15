@@ -88,6 +88,9 @@ class STRA_PT_Joint(Panel):
 
         layout.prop(props_structure, "overwrite")
 
+        if not props_structure.overwrite:
+            layout.prop(props_structure, "skip_check_existing_joints")
+
         if mesh_amount > 1:
             r = layout.row()
             r.scale_y = 2

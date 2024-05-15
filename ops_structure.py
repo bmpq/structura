@@ -223,7 +223,7 @@ class STRA_OT_Generate_Structure(Operator):
                 if not overlap_pairs:
                     continue
 
-                if not props.overwrite:
+                if not props.overwrite and not props.skip_check_existing_joints:
                     if (joint_exists(col_joints, obj1, obj2)):
                         print(f'(skip) joint already exists!')
                         continue

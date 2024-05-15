@@ -33,6 +33,11 @@ class STRA_PGT_Structure(PropertyGroup):
         name="Overwrite",
         default=True
     )
+    skip_check_existing_joints: bpy.props.BoolProperty(
+        name="Skip checking existing joints",
+        default=False,
+        description="Helps performance when there is high amount of existing joints on the scene (>10k)"
+    )
     progress: bpy.props.FloatProperty(
         name="Progress",
         min=0.0,
