@@ -42,7 +42,7 @@ def modify_const(ob, props):
     rbc.limit_lin_z_upper = lin_max
 
 
-def get_bvh(objects, use_overlap_margin, overlap_margin):
+def get_bvh(objects, overlap_margin):
     trees = []
     for obj in objects:
         if obj.type != 'MESH':
@@ -59,7 +59,7 @@ def get_bvh(objects, use_overlap_margin, overlap_margin):
 
         bmesh.ops.transform(bm, matrix=obj.matrix_world, verts=bm.verts)
 
-        if use_overlap_margin:
+        if overlap_margin != 0.0:
             bmesh.ops.solidify(bm, geom=bm.faces, thickness=-overlap_margin / 4)
 
         bm.verts.ensure_lookup_table()
@@ -144,13 +144,18 @@ class STRA_OT_Modify_Structure(Operator):
 
         col_joints = utils.get_collection_joints()
 
+        already_applied = []
         for ob in context.selected_objects:
             if ob.rigid_body is None:
                 continue
             joints = get_joints_by_rb(ob, col_joints)
             for ob in joints:
+                if ob in already_applied:
+                    continue
+                already_applied.append(ob)
                 modify_const(ob, props)
 
+        self.report({'INFO'}, f'Applied for {len(already_applied)} joint(s)')
         return {'FINISHED'}
 
 
@@ -197,11 +202,11 @@ class STRA_OT_Generate_Structure(Operator):
         bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
 
         print('creating bvh trees...')
-        trees = get_bvh(context.selected_objects, props.use_overlap_margin, props.overlap_margin)
+        trees = get_bvh(context.selected_objects, props.overlap_margin)
 
         num_existing_joints = 0
 
-        if props.overwrite:
+        if props.existing_joint_behaviour == 'OVERWRITE':
             print(f'overwrite on, removing existing joints...')
             for obj1 in context.selected_objects:
                 for obj2 in context.selected_objects:
@@ -223,7 +228,7 @@ class STRA_OT_Generate_Structure(Operator):
                 if not overlap_pairs:
                     continue
 
-                if not props.overwrite and not props.skip_check_existing_joints:
+                if props.existing_joint_behaviour == 'NEWONLY':
                     if (joint_exists(col_joints, obj1, obj2)):
                         print(f'(skip) joint already exists!')
                         continue

@@ -18,7 +18,6 @@ class STRA_PT_Joint(Panel):
         props_joint = context.scene.stra_props_joint
 
         col_joints = utils.get_collection_joints(False)
-        generated = col_joints is not None and len(col_joints.objects) > 0
 
         all_objects_have_rigidbody = True
         mesh_amount = 0
@@ -45,7 +44,7 @@ class STRA_PT_Joint(Panel):
         r = layout.row()
         c1 = r.column()
         c2 = r.column()
-        c1.label(text='Joint type')
+        c1.label(text='Joint type:')
         c2.prop(props_joint, "type", text="")
         if props_joint.type == 'GENERIC':
             r = layout.row()
@@ -53,43 +52,31 @@ class STRA_PT_Joint(Panel):
             r.prop(props_joint, "leeway_angular")
         layout.prop(props_joint, "use_local_collisions")
 
+        layout.prop(props_joint, "break_threshold", )
         if not props_structure.skip_volume:
             layout.prop(props_joint, "use_overlap_volume")
-        layout.prop(props_joint, "break_threshold")
 
-        joint_amount = 0
-        if generated:
-            for ob1 in context.selected_objects:
-                if ob1.rigid_body is None:
-                    continue
-                joints = ops_structure.get_joints_by_rb(ob1, col_joints)
-                if len(joints) == 0:
-                    continue
-                joint_amount += 1
-                break
-
-        if joint_amount > 0:
+        if col_joints is not None and len(col_joints.objects) > 0:
             r = layout.row()
             r.scale_y = 2
             r.operator("stra.structure_modify", icon='MOD_NORMALEDIT', text=f'Apply to joints of selected objects')
 
-        layout.separator(factor=1)
+        layout.separator(factor=2)
 
-        layout.prop(props_structure, "use_overlap_margin", text='Use overlap margin')
-        if props_structure.use_overlap_margin:
-            layout.prop(props_structure, "overlap_margin")
+        layout.prop(props_structure, "overlap_margin")
 
         if not props_structure.skip_volume:
             layout.prop(props_structure, "min_overlap_threshold")
 
+        layout.separator(factor=0.1)
+        r = layout.row()
+        r.scale_y = 0.5
+        r.label(text="Existing joint behaviour:")
+        layout.prop(props_structure, "existing_joint_behaviour", text="")
+
         if props_structure.progress > 0.0 and props_structure.progress < 1.0:
             r = layout.row()
             r.label(text=f"Progress: {props_structure.progress*100:.2f}%")
-
-        layout.prop(props_structure, "overwrite")
-
-        if not props_structure.overwrite:
-            layout.prop(props_structure, "skip_check_existing_joints")
 
         if mesh_amount > 1:
             r = layout.row()

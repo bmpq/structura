@@ -4,14 +4,15 @@ from . import utils
 
 
 class STRA_PGT_Structure(PropertyGroup):
+    existing_joint_behaviour_choice = []
+    existing_joint_behaviour_choice.append(('OVERWRITE', 'Overwrite', 'If there is already a joint between objects, delete it and calculate again'))
+    existing_joint_behaviour_choice.append(('NEWONLY', 'New only', 'If there is already a joint between objects, don\'t create a new one'))
+    existing_joint_behaviour_choice.append(('NOCHECK', 'Skip checking completely', 'Allow the possibility of duplicate joints between objects. Improves performance when there is a high amount of joints on the scene'))
+
     skip_volume: bpy.props.BoolProperty(
-        name="Skip volume calculation",
-        description="Faster but approximates the joint location. Not recommended",
+        name="Skip overlap volume calculation",
+        description="Faster but approximates the joint location by just putting it at the midpoint between objects",
         default=False
-    )
-    use_overlap_margin: bpy.props.BoolProperty(
-        name="Overlap margin",
-        default=True
     )
     overlap_margin: bpy.props.FloatProperty(
         name="Overlap margin",
@@ -27,16 +28,12 @@ class STRA_PGT_Structure(PropertyGroup):
         soft_max=10,
         default=0,
         precision=3,
-        step=1
+        step=1,
+        description="Don't create joint if the overlap between 2 objects is smaller than this value."
     )
-    overwrite: bpy.props.BoolProperty(
-        name="Overwrite",
-        default=True
-    )
-    skip_check_existing_joints: bpy.props.BoolProperty(
-        name="Skip checking existing joints",
-        default=False,
-        description="Helps performance when there is high amount of existing joints on the scene (>10k)"
+    existing_joint_behaviour: bpy.props.EnumProperty(
+        name="Existing joint behaviour",
+        items=existing_joint_behaviour_choice
     )
     progress: bpy.props.FloatProperty(
         name="Progress",
@@ -53,6 +50,7 @@ class STRA_PGT_Joint(PropertyGroup):
     constraint_types.append(('GENERIC', 'Elastic', 'Joints with elbow room'))
 
     type: bpy.props.EnumProperty(
+        name="Joint type",
         items=constraint_types
     )
     use_local_collisions: bpy.props.BoolProperty(
@@ -67,20 +65,19 @@ class STRA_PGT_Joint(PropertyGroup):
     break_threshold: bpy.props.FloatProperty(
         name="Break threshold",
         min=0.0,
-        soft_max=10000.0,
-        default=5
+        default=500
     )
     leeway_linear: bpy.props.FloatProperty(
         name="Linear range",
         min=0.0,
         soft_max=1.0,
-        default=0.01,
+        default=0.0,
     )
     leeway_angular: bpy.props.FloatProperty(
         name="Angular range",
         min=0.0,
         soft_max=180.0,
-        default=1
+        default=0.1
     )
 
 
