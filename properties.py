@@ -79,39 +79,3 @@ class STRA_PGT_Joint(PropertyGroup):
         soft_max=180.0,
         default=0.1
     )
-
-
-class STRA_PGT_Collider(PropertyGroup):
-    rb_shapes = []
-    rb_shapes.append(('CONVEX', 'Convex Hull', ''))
-    rb_shapes.append(('VOXEL', 'Remesh Voxel', ''))
-    shape: bpy.props.EnumProperty(
-        items=rb_shapes
-    )
-    scale_global: bpy.props.FloatVectorProperty(
-        name='Scale (object local axis)', subtype='XYZ',
-        default=(1.0, 1.0, 1.0),
-        precision=4,
-        step=1
-    )
-    scale_custom: bpy.props.FloatVectorProperty(
-        name='Scale (mesh calculated axis)', subtype='XYZ',
-        description='The custom axis is derived from the vertices that are the furthest apart from each other',
-        default=(1.0, 1.0, 1.0),
-        precision=4,
-        step=1
-    )
-    voxel_size: bpy.props.FloatProperty(
-        name='Voxel size',
-        min=0.01,
-        default=0.1
-    )
-    progress: bpy.props.FloatProperty(
-        name='Progress',
-        default=0
-    )
-    density: bpy.props.FloatProperty(
-        name='Density',
-        default=2600,
-        step=100
-    )
