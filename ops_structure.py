@@ -77,15 +77,28 @@ def get_bvh(objects, overlap_margin):
 def get_joints_by_rb(obj_rb, col_joints):
     joint_objs = []
 
-    for ob in col_joints.objects:
-        const = ob.rigid_body_constraint
-        if const is None:
-            continue
-        if const.object1 == obj_rb or const.object2 == obj_rb:
-            joint_objs.append(ob)
-            continue
+    if "joints" not in obj_rb:
+        return joint_objs
+
+    for name in obj_rb["joints"]:
+        joint_obj = col_joints.objects.get(name)
+        if joint_obj is not None:
+            joint_objs.append(joint_obj)
 
     return joint_objs
+
+
+def store_joint_reference(obj1, joint):
+    if "joints" in obj1:
+        joints = obj1["joints"]
+        if isinstance(joints, list):
+            if joint.name not in joints:
+                joints.append(joint.name)
+        else:
+            joints = [joint.name]
+    else:
+        joints = [joint.name]
+    obj1["joints"] = joints
 
 
 def create_joint(col_joints, obj1, obj2, loc, volume):
@@ -108,6 +121,9 @@ def create_joint(col_joints, obj1, obj2, loc, volume):
 
     empty['intersection_volume'] = volume
 
+    store_joint_reference(obj1, empty)
+    store_joint_reference(obj2, empty)
+
     return empty
 
 
@@ -117,6 +133,8 @@ def remove_existing_joints(col_joints, obj1, obj2):
     for ex_joint in existing_joints:
         rbc = ex_joint.rigid_body_constraint
         if rbc.object1 == obj2 or rbc.object2 == obj2:
+            rbc.object1["joints"].remove(ex_joint.name)
+            rbc.object2["joints"].remove(ex_joint.name)
             for col in ex_joint.users_collection:
                 col.objects.unlink(ex_joint)
             num_existing_joints += 1
