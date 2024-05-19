@@ -89,17 +89,20 @@ def get_joints_by_rb(obj_rb, col_joints):
 
 
 def create_joint(col_joints, obj1, obj2, loc, volume):
-    empty_name = utils.OBJNAME_JOINT
-    empty = bpy.data.objects.new(empty_name, None)
-    col_joints.objects.link(empty)
-
-    bpy.context.view_layer.objects.active = empty
-    bpy.ops.rigidbody.constraint_add()
+    if len(col_joints.objects) == 0:
+        empty = bpy.data.objects.new(utils.OBJNAME_JOINT, None)
+        col_joints.objects.link(empty)
+        bpy.context.view_layer.objects.active = empty
+        bpy.ops.rigidbody.constraint_add()
+    else:
+        original = col_joints.objects[0]
+        empty = original.copy()
+        col_joints.objects.link(empty)
 
     empty.location = loc
 
-    bpy.context.object.rigid_body_constraint.object1 = obj1
-    bpy.context.object.rigid_body_constraint.object2 = obj2
+    empty.rigid_body_constraint.object1 = obj1
+    empty.rigid_body_constraint.object2 = obj2
 
     empty.empty_display_size = 0.05
 
