@@ -5,14 +5,14 @@ from . import utils
 
 class STRA_PGT_Structure(PropertyGroup):
     existing_joint_behaviour_choice = []
-    existing_joint_behaviour_choice.append(('OVERWRITE', 'Overwrite', 'If there is already a joint between objects, delete it and calculate again'))
     existing_joint_behaviour_choice.append(('NEWONLY', 'New only', 'If there is already a joint between objects, don\'t create a new one'))
+    existing_joint_behaviour_choice.append(('OVERWRITE', 'Overwrite', 'If there is already a joint between objects, delete it and calculate again. Slow'))
     existing_joint_behaviour_choice.append(('NOCHECK', 'Skip checking completely', 'Allow the possibility of duplicate joints between objects. Improves performance when there is a high amount of joints on the scene'))
 
-    skip_volume: bpy.props.BoolProperty(
-        name="Skip overlap volume calculation",
-        description="Faster but approximates the joint location by just putting it at the midpoint between objects",
-        default=False
+    mode: bpy.props.EnumProperty(
+        name="Mode:",
+        items=[('FAST', "Fast", "Approximates the joint location by just putting it at the midpoint between objects"),
+               ('EXACT', "Exact", "Puts the joint exactly at the center of an overlap between objects. Also calculates overlap volume")]
     )
     overlap_margin: bpy.props.FloatProperty(
         name="Overlap margin",
@@ -29,7 +29,7 @@ class STRA_PGT_Structure(PropertyGroup):
         default=0,
         precision=3,
         step=1,
-        description="Don't create joint if the overlap between 2 objects is smaller than this value."
+        description="Don't create joint if the overlap between 2 objects is smaller than this value"
     )
     existing_joint_behaviour: bpy.props.EnumProperty(
         name="Existing joint behaviour",
@@ -60,7 +60,7 @@ class STRA_PGT_Joint(PropertyGroup):
     )
     use_overlap_volume: bpy.props.BoolProperty(
         name="Multiply break threshold by overlap volume",
-        default=True
+        default=False
     )
     break_threshold: bpy.props.FloatProperty(
         name="Break threshold",

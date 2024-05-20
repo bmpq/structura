@@ -40,7 +40,13 @@ class STRA_PT_Joint(Panel):
             layout.label(text=f'(Not all selected objects have rigid body)')
             return
 
-        layout.prop(props_structure, "skip_volume")
+        layout.separator(factor=1)
+        r = layout.row()
+        r.scale_y = 0.5
+        r.label(text='Generation mode:')
+        layout.prop(props_structure, "mode", expand=True)
+        layout.separator(factor=1.8)
+
         r = layout.row()
         c1 = r.column()
         c2 = r.column()
@@ -53,7 +59,7 @@ class STRA_PT_Joint(Panel):
         layout.prop(props_joint, "use_local_collisions")
 
         layout.prop(props_joint, "break_threshold", )
-        if not props_structure.skip_volume:
+        if props_structure.mode == "EXACT":
             layout.prop(props_joint, "use_overlap_volume")
 
         if col_joints is not None and len(col_joints.objects) > 0:
@@ -65,7 +71,7 @@ class STRA_PT_Joint(Panel):
 
         layout.prop(props_structure, "overlap_margin")
 
-        if not props_structure.skip_volume:
+        if props_structure.mode == "EXACT":
             layout.prop(props_structure, "min_overlap_threshold")
 
         layout.separator(factor=0.1)

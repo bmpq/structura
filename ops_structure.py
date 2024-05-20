@@ -133,6 +133,7 @@ def remove_existing_joints(col_joints, obj1, obj2):
     for ex_joint in existing_joints:
         rbc = ex_joint.rigid_body_constraint
         if rbc.object1 == obj2 or rbc.object2 == obj2:
+            print(f'removing joint between {rbc.object1.name} and {rbc.object2.name}')
             rbc.object1["joints"].remove(ex_joint.name)
             rbc.object2["joints"].remove(ex_joint.name)
             for col in ex_joint.users_collection:
@@ -211,6 +212,8 @@ class STRA_OT_Generate_Structure(Operator):
     bl_options = {"UNDO_GROUPED"}
 
     def execute(self, context):
+        bpy.context.scene.frame_current = 0
+
         if context.scene.rigidbody_world is None:
             bpy.ops.rigidbody.world_add()
 
@@ -237,6 +240,7 @@ class STRA_OT_Generate_Structure(Operator):
             print(f'done removing {num_existing_joints} joints')
 
         joints_generated_amount = 0
+        joints_already_exist = 0
 
         start_time = time.time()
 
@@ -251,6 +255,7 @@ class STRA_OT_Generate_Structure(Operator):
 
                 if props.existing_joint_behaviour == 'NEWONLY':
                     if (joint_exists(col_joints, obj1, obj2)):
+                        joints_already_exist += 1
                         print(f'(skip) joint already exists!')
                         continue
 
@@ -260,7 +265,7 @@ class STRA_OT_Generate_Structure(Operator):
                 loc = Vector((0, 0, 0))
                 volume = props.overlap_margin
 
-                if not props.skip_volume:
+                if props.mode == "EXACT":
                     intersect_obj = create_intersection_mesh(
                         obj1, obj2, props.overlap_margin)
 
@@ -302,11 +307,11 @@ class STRA_OT_Generate_Structure(Operator):
             print(f"One iteration done")
             print(f"Progress: {props.progress*100:.2f}%")
 
-            if not props.skip_volume:
+            if props.mode == "EXACT":
                 bpy.ops.outliner.orphans_purge(do_local_ids=True)
 
         result = f"{joints_generated_amount} joint(s) generated"
-        result += f", ({joints_generated_amount - num_existing_joints} new)"
+        result += f", ({joints_generated_amount - num_existing_joints} new, {joints_already_exist} already exist)"
         self.report({'INFO'}, result)
 
         end_time = time.time()
