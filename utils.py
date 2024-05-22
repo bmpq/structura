@@ -69,3 +69,11 @@ def draw_list_entry(b, left, right):
     c2 = r.column()
     c2.alignment = 'RIGHT'
     c2.label(text=f'{right}')
+
+
+def remove_joint_from_property(ob, joint_name):
+    if "joints" not in ob:
+        return
+
+    new_joints = [name for name in ob["joints"] if name != joint_name]
+    ob["joints"] = new_joints

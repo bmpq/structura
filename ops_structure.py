@@ -134,8 +134,10 @@ def remove_existing_joints(col_joints, obj1, obj2):
         rbc = ex_joint.rigid_body_constraint
         if rbc.object1 == obj2 or rbc.object2 == obj2:
             print(f'removing joint between {rbc.object1.name} and {rbc.object2.name}')
-            rbc.object1["joints"].remove(ex_joint.name)
-            rbc.object2["joints"].remove(ex_joint.name)
+
+            utils.remove_joint_from_property(rbc.object1, ex_joint.name)
+            utils.remove_joint_from_property(rbc.object2, ex_joint.name)
+
             for col in ex_joint.users_collection:
                 col.objects.unlink(ex_joint)
             num_existing_joints += 1
