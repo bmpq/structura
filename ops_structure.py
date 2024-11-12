@@ -84,6 +84,8 @@ def get_joints_by_rb(obj_rb, col_joints):
         joint_obj = col_joints.objects.get(name)
         if joint_obj is not None:
             joint_objs.append(joint_obj)
+        else:
+            utils.remove_joint_from_property(obj_rb, name)
 
     return joint_objs
 
@@ -117,7 +119,8 @@ def create_joint(col_joints, obj1, obj2, loc, volume):
     empty.rigid_body_constraint.object1 = obj1
     empty.rigid_body_constraint.object2 = obj2
 
-    empty.empty_display_size = 0.05
+    empty.empty_display_size = 0.1
+    empty.empty_display_type = 'ARROWS'
 
     empty['intersection_volume'] = volume
 

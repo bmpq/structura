@@ -1,7 +1,7 @@
 bl_info = {
     "name": "Structura",
     "author": "bmpq",
-    "version": (0, 4, 0),
+    "version": (0, 4, 2),
     "location": "View3D > Sidebar > Tools",
     "blender": (3, 0, 0),
     "category": "3D View"
@@ -12,6 +12,7 @@ import bpy
 from . import (
     properties,
     ops_structure,
+    ops_utilities,
     ui,
     utils
 )
@@ -23,7 +24,10 @@ classes = [
     ops_structure.STRA_OT_Generate_Structure,
     ops_structure.STRA_OT_Modify_Structure,
 
+    ops_utilities.STRA_OT_Select_Joints,
+
     ui.STRA_PT_Joint,
+    ui.STRA_PT_Utilities
 ]
 
 def register():

@@ -6,7 +6,7 @@ import bmesh
 
 class STRA_PT_Joint(Panel):
     bl_idname = "STRA_PT_Joint"
-    bl_label = "Joints"
+    bl_label = "Create joints"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_category = "Structura"
@@ -89,3 +89,33 @@ class STRA_PT_Joint(Panel):
             r.scale_y = 2
             txt_button = f'Generate between {mesh_amount} objects'
             r.operator("stra.structure_generate", icon='MOD_MESHDEFORM', text=txt_button)
+
+
+
+class STRA_PT_Utilities(Panel):
+    bl_idname = "STRA_PT_Utilities"
+    bl_label = "Utilities"
+    bl_category = "Structura"
+    bl_space_type = 'VIEW_3D'
+    bl_region_type = 'UI'
+    bl_context = "objectmode"
+    bl_options = {'DEFAULT_CLOSED'}
+
+    def draw(self, context):
+        layout = self.layout
+
+        amount_selected_meshes = 0
+        joints = []
+        for ob in context.selected_objects:
+            if ob.type == 'MESH':
+                amount_selected_meshes += 1
+                if ob.get("joints"):
+                    for name in ob["joints"]:
+                        if name not in joints:
+                            joints.append(name)
+        layout.label(text=f'{amount_selected_meshes} selected meshes')
+        layout.label(text=f'with {len(joints)} joints')
+
+        r = layout.row()
+        r.operator("stra.utils_select_joints", icon='ACTION_TWEAK', text="Select joints", )
+        r.enabled = len(joints) > 0
